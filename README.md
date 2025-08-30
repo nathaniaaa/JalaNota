@@ -1,7 +1,9 @@
-# JalaNota
-Aplikasi pencatatan tangkapan nelayan
+# 🎣 JalaNota
+JalaNota merupakan proyek **Junior Project** berupa pengembangan aplikasi yang berfokus pada digitalisasi pencatatan tangkapan nelayan untuk penadah ikan.
 
-SOJUN
+---
+
+## Kelompok SOJUN
 
 Ketua Kelompok: KAYANA ANINDYA AZARIA - 23/521475/TK/57528
 
