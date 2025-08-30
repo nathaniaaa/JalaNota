@@ -3,7 +3,7 @@ Aplikasi pencatatan tangkapan nelayan
 
 SOJUN
 
-Ketua Kelompok:
+Ketua Kelompok: KAYANA ANINDYA AZARIA - 23/521475/TK/57528
 
 Anggota 1:
 
