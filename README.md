@@ -3,8 +3,8 @@ Aplikasi pencatatan tangkapan nelayan
 
 SOJUN
 
-Ketua Kelompok: KAYANA ANINDYA AZARIA - 23/521475/TK/57528
+Ketua Kelompok: 
 
 Anggota 1: EGA BASKARA NUGROHO - 23/521518/TK/57532
 
-Anggota 2: NATHANIA RATNADEWI - 23/522605/TK/57712
+Anggota 2: 
