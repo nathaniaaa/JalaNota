@@ -37,5 +37,18 @@ namespace JalaNota
                 return false;
             }
         }
+
+        public void LihatHargaIkan()
+        {
+            Console.WriteLine("\n--- Daftar Harga Ikan Saat Ini ---");
+            List<JenisIkan> daftarIkan = JenisIkan.LihatSemuaJenisIkan();
+
+            // Menampilkan setiap ikan dalam daftar
+            foreach (var ikan in daftarIkan)
+            {
+                Console.WriteLine($"ID: {ikan.IDIkan}, Nama: {ikan.NamaIkan}, Harga/Kg: Rp{ikan.HargaPerKg}");
+            }
+            Console.WriteLine("---------------------------------\n");
+        }
     }
 }

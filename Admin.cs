@@ -59,5 +59,17 @@ namespace JalaNota
         {
             // TODO: isi kode untuk menghapus data nelayan dari database berdasarkan IDNelayan
         }
+
+        public void TambahJenisIkan(string namaIkan, double harga)
+        {
+            JenisIkan.TambahIkanBaru(namaIkan, harga);
+            Console.WriteLine($"--- Admin {this.NamaAdmin} menambahkan ikan: {namaIkan} ---");
+        }
+
+        public void EditHargaIkan(int idIkan, double hargaBaru)
+        {
+            JenisIkan.UbahHargaIkan(idIkan, hargaBaru);
+            Console.WriteLine($"--- Admin {this.NamaAdmin} mengubah harga ikan ID: {idIkan} ---");
+        }
     }
 }
