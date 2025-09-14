@@ -1,7 +1,7 @@
-# JalaNota
+# 🎣 JalaNota
+JalaNota merupakan proyek **Junior Project** berupa pengembangan aplikasi yang berfokus pada digitalisasi pencatatan tangkapan nelayan untuk penadah ikan.
 
-JalaNota merupakan proyek **Junior Project** berupa pengembangan aplikasi yang berfokus pada digitalisasi pencatatan tangkapan nelayan untuk pensadah ikan.
-
+---
 
 ## Kelompok SOJUN
 
