@@ -71,5 +71,34 @@ namespace JalaNota
             JenisIkan.UbahHargaIkan(idIkan, hargaBaru);
             Console.WriteLine($"--- Admin {this.NamaAdmin} mengubah harga ikan ID: {idIkan} ---");
         }
+        public void CatatSetoran(int idNelayan, int idIkan, double berat)
+        {
+            JenisIkan ikan = JenisIkan.GetJenisIkanById(idIkan);
+            if (ikan == null)
+            {
+                Console.WriteLine($"Error: Ikan dengan ID {idIkan} tidak ditemukan.");
+                return;
+            }
+
+            Setoran setoranBaru = new Setoran();
+            double totalHarga = setoranBaru.HitungTotalHarga(berat, ikan.HargaPerKg);
+
+            setoranBaru.IDNelayan = idNelayan;
+            setoranBaru.IDIkan = idIkan;
+            setoranBaru.BeratKg = berat;
+            setoranBaru.IDAdmin = this.IDAdmin;
+            setoranBaru.WaktuSetor = DateTime.Now;
+            setoranBaru.HargaTotal = totalHarga;
+
+            Setoran.TambahSetoranBaru(setoranBaru);
+
+            Console.WriteLine("\n--- Setoran Berhasil Dicatat ---");
+            Console.WriteLine($"Dicatat oleh Admin: {this.NamaAdmin}");
+            Console.WriteLine($"Untuk Nelayan ID  : {idNelayan}");
+            Console.WriteLine($"Ikan              : {ikan.NamaIkan}");
+            Console.WriteLine($"Berat             : {berat} Kg");
+            Console.WriteLine($"Total Harga       : Rp{totalHarga}");
+            Console.WriteLine("--------------------------------\n");
+        }
     }
 }

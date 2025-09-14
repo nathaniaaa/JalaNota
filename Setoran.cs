@@ -17,10 +17,25 @@ namespace JalaNota
         public double BeratKg { get; set; }
         public double HargaTotal { get; set; }
 
+        private static List<Setoran> daftarSetoran = new List<Setoran>();
+
         // Metode
         public double HitungTotalHarga(double berat, double hargaPerKg)
         {
             return berat * hargaPerKg;
+        }
+
+        public static List<Setoran> LihatSemuaSetoran()
+        {
+            return daftarSetoran;
+        }
+
+        public static void TambahSetoranBaru(Setoran setoranBaru)
+        {
+            // Membuat ID baru secara otomatis
+            int newId = daftarSetoran.Count > 0 ? daftarSetoran.Max(s => s.IDSetoran) + 1 : 1;
+            setoranBaru.IDSetoran = newId;
+            daftarSetoran.Add(setoranBaru);
         }
     }
 }

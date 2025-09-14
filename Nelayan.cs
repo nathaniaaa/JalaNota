@@ -50,5 +50,38 @@ namespace JalaNota
             }
             Console.WriteLine("---------------------------------\n");
         }
+
+        public void LihatRiwayatSetoran()
+        {
+            Console.WriteLine($"\n--- Riwayat Setoran untuk {this.NamaNelayan} ---");
+
+            // Mengambil semua data setoran
+            List<Setoran> semuaSetoran = Setoran.LihatSemuaSetoran();
+
+            // Memfilter data setoran hanya untuk nelayan yang sedang login
+            var riwayatNelayan = semuaSetoran.Where(s => s.IDNelayan == this.IDNelayan).ToList();
+
+            if (riwayatNelayan.Any())
+            {
+                foreach (var setoran in riwayatNelayan)
+                {
+                    // Mengambil detail nama ikan berdasarkan IDIkan
+                    JenisIkan ikan = JenisIkan.GetJenisIkanById(setoran.IDIkan);
+                    string namaIkan = ikan != null ? ikan.NamaIkan : "Tidak Ditemukan";
+
+                    Console.WriteLine($"ID Setoran: {setoran.IDSetoran}");
+                    Console.WriteLine($"Tanggal   : {setoran.WaktuSetor}");
+                    Console.WriteLine($"Ikan      : {namaIkan}");
+                    Console.WriteLine($"Berat     : {setoran.BeratKg} Kg");
+                    Console.WriteLine($"Total     : Rp{setoran.HargaTotal}");
+                    Console.WriteLine("---------------------------------");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Anda belum memiliki riwayat setoran.");
+                Console.WriteLine("---------------------------------\n");
+            }
+        }
     }
 }
