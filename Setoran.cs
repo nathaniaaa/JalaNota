@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace JalaNota
 {
-    class Setoran
+    public class Setoran
     {
         // Properti
         public int IDSetoran { get; set; }
