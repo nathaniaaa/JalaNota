@@ -13,3 +13,6 @@ Anggota 2: NATHANIA RATNADEWI - 23/522605/TK/57712
 
 ## Class Diagram
 ![JUNPRO-class diagram (2)](https://github.com/user-attachments/assets/5d830220-d55e-492d-9d71-bd8c12e5c07e)
+
+## ERD
+![JUNPRO-Page-9 (1)](https://github.com/user-attachments/assets/5b4fb8ec-222d-4bc4-af61-3e64e7daf5e5)
