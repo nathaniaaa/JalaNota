@@ -55,10 +55,24 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ManageDaftarIkan.xaml.cs">
+      <DependentUpon>ManageDaftarIkan.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LihatHargaIkan%28non-admin%29.xaml.cs">
+      <DependentUpon>LihatHargaIkan%28non-admin%29.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RegisterNelayan.xaml.cs">
       <DependentUpon>RegisterNelayan.xaml</DependentUpon>
     </Compile>
     <Compile Include="Setoran.cs" />
+    <Page Include="ManageDaftarIkan.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LihatHargaIkan%28non-admin%29.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

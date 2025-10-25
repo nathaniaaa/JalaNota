@@ -1,0 +1,211 @@
+﻿<Window x:Class="JalaNota.ManageDaftarIkan"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Manage Daftar Ikan" Height="520" Width="701"
+        Background="#F7FBFF" WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style x:Key="RightAlignStyle" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Right"/>
+            <Setter Property="Padding" Value="0,0,8,0"/>
+        </Style>
+
+        <Style x:Key="RoundedButton" TargetType="Button">
+            <Setter Property="Background" Value="#2C7DA0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Width" Value="90"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1E5A70"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NavTabStyle" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#1E3A5F"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,0,5,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Border x:Name="HoverBorder" Background="Transparent" CornerRadius="4"/>
+                            <StackPanel>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                <Border x:Name="ActiveIndicator" 
+                                        Height="2" 
+                                        Width="{Binding ActualWidth, ElementName=Content}"
+                                        Background="Transparent"
+                                        Margin="5,0,5,-5"/>
+                            </StackPanel>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HoverBorder" Property="Background" Value="#C0D9E8"/>
+                                <Setter Property="Foreground" Value="#2C7DA0"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="ActiveIndicator" Property="Background" Value="#2C7DA0"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Foreground" Value="#2C7DA0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="NavActionStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#D9534F"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FADBD8"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
+
+    <DockPanel LastChildFill="True">
+
+        <Border Background="#D2E9F4" Height="45" DockPanel.Dock="Top" BorderBrush="#C0D9E8" BorderThickness="0,0,0,1">
+            <Grid Margin="10,0,10,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+
+                    <RadioButton Content="Manage Setoran" 
+                                 Style="{StaticResource NavTabStyle}" 
+                                 GroupName="NavTabs" 
+                                 Click="ManageSetoran_Click"/>
+
+                    <RadioButton Content="Manage Nelayan" 
+                                 Style="{StaticResource NavTabStyle}" 
+                                 GroupName="NavTabs" 
+                                 Click="ManageNelayan_Click"/>
+
+                    <RadioButton Content="Manage Daftar Ikan" 
+                                 Style="{StaticResource NavTabStyle}" 
+                                 GroupName="NavTabs" 
+                                 IsChecked="True" 
+                                 Click="ManageIkan_Click"/>
+                </StackPanel>
+
+                <Button Grid.Column="1" 
+                        Content="Logout" 
+                        Style="{StaticResource NavActionStyle}" 
+                        Click="Logout_Click"
+                        VerticalAlignment="Center"/>
+
+            </Grid>
+        </Border>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <Grid Margin="20">
+
+                <Border Background="#D2E9F4"
+                        CornerRadius="8"
+                        Padding="10"
+                        Margin="0,0,0,10"
+                        VerticalAlignment="Top"
+                        Height="60">
+                    <DockPanel>
+                        <TextBlock Text="Manage Daftar Ikan"
+                                   FontSize="22"
+                                   FontWeight="Bold"
+                                   Foreground="#1E3A5F"
+                                   DockPanel.Dock="Left"
+                                   VerticalAlignment="Center"/>
+                    </DockPanel>
+                </Border>
+
+                <StackPanel Margin="0,80,0,0">
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="ID Ikan:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0,5"/>
+                        <TextBox x:Name="txtIDIkan" Grid.Row="0" Grid.Column="1" Margin="0,5" Height="28"/>
+
+                        <TextBlock Text="Nama Ikan:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="0,5"/>
+                        <TextBox x:Name="txtNamaIkan" Grid.Row="1" Grid.Column="1" Margin="0,5" Height="28"/>
+
+                        <TextBlock Text="Harga (Rp/kg):" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="0,5"/>
+                        <TextBox x:Name="txtHarga" Grid.Row="2" Grid.Column="1" Margin="0,5" Height="28"/>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
+                        <Button x:Name="btnInput" Content="INPUT" Style="{StaticResource RoundedButton}" Margin="0,0,10,0" Click="btnInput_Click"/>
+                        <Button x:Name="btnEdit" Content="EDIT" Style="{StaticResource RoundedButton}" Margin="0,0,10,0" Click="btnEdit_Click"/>
+                        <Button x:Name="btnDelete" Content="DELETE" Style="{StaticResource RoundedButton}" Margin="0,0,10,0" Click="btnDelete_Click"/>
+                        <Button x:Name="btnClose" Content="CLOSE" Style="{StaticResource RoundedButton}" Click="btnClose_Click"/>
+                    </StackPanel>
+
+                    <DataGrid x:Name="dataGridIkan"
+                              AutoGenerateColumns="False"
+                              FontSize="14"
+                              HeadersVisibility="Column"
+                              RowHeaderWidth="0"
+                              CanUserAddRows="False"
+                              AlternatingRowBackground="#F0F8FF"
+                              BorderBrush="#B0C4DE"
+                              BorderThickness="1"
+                              Height="280"
+                              SelectionChanged="dataGridIkan_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID Ikan" Binding="{Binding IDIkan}" Width="120"/>
+                            <DataGridTextColumn Header="Nama Ikan" Binding="{Binding NamaIkan}" Width="*"/>
+                            <DataGridTextColumn Header="Harga (Rp/kg)" Binding="{Binding Harga}" Width="150" ElementStyle="{StaticResource RightAlignStyle}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+    </DockPanel>
+</Window>

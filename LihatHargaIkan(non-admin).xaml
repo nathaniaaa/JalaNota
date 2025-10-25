@@ -1,0 +1,85 @@
+﻿<Window x:Class="JalaNota.LihatHargaIkan_non_admin_"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Lihat Harga Ikan" Height="480" Width="800"
+        Background="#F7FBFF" WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style x:Key="RightAlignStyle" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Right"/>
+            <Setter Property="Padding" Value="0,0,8,0"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+
+        <Border Background="#D2E9F4" 
+                CornerRadius="8" 
+                Padding="10" 
+                Margin="0,0,0,10"
+                VerticalAlignment="Top" 
+                Height="60">
+
+            <DockPanel>
+                <TextBlock Text="Selamat Datang di Aplikasi JalaNota!"
+                           FontSize="22" FontWeight="Bold"
+                           Foreground="#1E3A5F"
+                           DockPanel.Dock="Left"
+                           VerticalAlignment="Center"/>
+
+                <Button x:Name="LoginBtn" 
+                            Content="Login"
+                            Width="100" Height="36"
+                            FontSize="16"
+                            Background="#2C7DA0"
+                            Foreground="White"
+                            BorderBrush="#1E3A5F"
+                            BorderThickness="1"
+                            Padding="4"
+                            Cursor="Hand"
+                            Click="Login_Click"
+                            VerticalAlignment="Center"
+                            DockPanel.Dock="Right" HorizontalAlignment="Right">
+
+                                    <Button.Resources>
+                                        <Style TargetType="Border">
+                                            <Setter Property="CornerRadius" Value="8"/>
+                                        </Style>
+                                    </Button.Resources> 
+                </Button>
+            </DockPanel>
+        </Border>
+
+        <StackPanel Margin="0,80,0,0">
+
+            <TextBlock Text="Daftar Harga Ikan per Kilogram"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Foreground="#1E3A5F"
+                       Margin="0,0,0,10"/>
+
+            <DataGrid x:Name="dataGridIkan"
+                      AutoGenerateColumns="False"
+                      FontSize="14"
+                      HeadersVisibility="Column"
+                      RowHeaderWidth="0"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      AlternatingRowBackground="#F0F8FF"
+                      BorderBrush="#B0C4DE"
+                      BorderThickness="1"
+                      Height="300" SelectionChanged="dataGridIkan_SelectionChanged">
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Nama Ikan"
+                                        Binding="{Binding NamaIkan}"
+                                        Width="*"/>
+                    <DataGridTextColumn Header="Harga (Rp/kg)"
+                                        Binding="{Binding Harga}"
+                                        Width="150"
+                                        ElementStyle="{StaticResource RightAlignStyle}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+    </Grid>
+</Window>
