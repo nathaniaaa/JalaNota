@@ -10,17 +10,16 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace JalaNota
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for LoginNelayan.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class LoginNelayan : Window
     {
-        public MainWindow()
+        public LoginNelayan()
         {
             InitializeComponent();
         }
