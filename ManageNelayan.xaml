@@ -204,8 +204,8 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="ID Nelayan" Binding="{Binding IDNelayan}" Width="120"/>
                             <DataGridTextColumn Header="Nama Nelayan" Binding="{Binding NamaNelayan}" Width="*"/>
-                            <DataGridTextColumn Header="Username" Binding="{Binding Username}" Width="150"/>
-                            <DataGridTextColumn Header="Password" Binding="{Binding Password}" Width="150" ElementStyle="{StaticResource RightAlignStyle}"/>
+                            <DataGridTextColumn Header="Username" Binding="{Binding UsnNelayan}" Width="150"/>
+                            <DataGridTextColumn Header="Password" Binding="{Binding PasswordNelayan}" Width="150" ElementStyle="{StaticResource RightAlignStyle}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>
