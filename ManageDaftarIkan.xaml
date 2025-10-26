@@ -200,7 +200,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="ID Ikan" Binding="{Binding IDIkan}" Width="120"/>
                             <DataGridTextColumn Header="Nama Ikan" Binding="{Binding NamaIkan}" Width="*"/>
-                            <DataGridTextColumn Header="Harga (Rp/kg)" Binding="{Binding Harga}" Width="150" ElementStyle="{StaticResource RightAlignStyle}"/>
+                            <DataGridTextColumn Header="Harga (Rp/kg)" Binding="{Binding HargaPerKg}" Width="150" ElementStyle="{StaticResource RightAlignStyle}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>

@@ -1,70 +1,98 @@
 ﻿using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
-using System.Windows.Controls; 
+using System.Windows.Controls;
+using System.Collections.Generic;
 
 namespace JalaNota
 {
+    // Menggunakan JenisIkan langsung sebagai Model View karena strukturnya cocok
     public partial class ManageDaftarIkan : Window
     {
-        public ObservableCollection<Ikan> DaftarIkan { get; set; }
+        // ObservableCollection untuk menampilkan dan merefresh DataGrid
+        public ObservableCollection<JenisIkan> DaftarIkanView { get; set; }
 
         public ManageDaftarIkan()
         {
             InitializeComponent();
 
-            // Data dummy 
-            DaftarIkan = new ObservableCollection<Ikan>()
+            DaftarIkanView = new ObservableCollection<JenisIkan>();
+            MuatDaftarIkan();
+            dataGridIkan.ItemsSource = DaftarIkanView;
+        }
+
+        private void MuatDaftarIkan()
+        {
+            DaftarIkanView.Clear();
+            List<JenisIkan> dataDariModel = JenisIkan.LihatSemuaJenisIkan();
+
+            foreach (var ikan in dataDariModel)
             {
-                new Ikan(){ IDIkan="IKN001", NamaIkan="Gurame", Harga=40000 },
-                new Ikan(){ IDIkan="IKN002", NamaIkan="Lele", Harga=25000 },
-                new Ikan(){ IDIkan="IKN003", NamaIkan="Nila", Harga=30000 }
-            };
-            dataGridIkan.ItemsSource = DaftarIkan;
+                DaftarIkanView.Add(ikan);
+            }
         }
 
         // --- CRUD Buttons ---
 
         private void btnInput_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtIDIkan.Text) ||
-                string.IsNullOrWhiteSpace(txtNamaIkan.Text) ||
-                string.IsNullOrWhiteSpace(txtHarga.Text))
+            // Validasi: ID Ikan tidak perlu diisi karena dibuat otomatis di JenisIkan.TambahIkanBaru
+            if (string.IsNullOrWhiteSpace(txtNamaIkan.Text) || string.IsNullOrWhiteSpace(txtHarga.Text))
             {
-                MessageBox.Show("Semua field harus diisi!", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Nama Ikan dan Harga harus diisi!", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!int.TryParse(txtHarga.Text, out int harga))
+            if (!double.TryParse(txtHarga.Text, out double harga))
             {
                 MessageBox.Show("Harga harus berupa angka!", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            DaftarIkan.Add(new Ikan()
-            {
-                IDIkan = txtIDIkan.Text,
-                NamaIkan = txtNamaIkan.Text,
-                Harga = harga
-            });
+            // Memanggil metode statis dari JenisIkan.cs
+            JenisIkan.TambahIkanBaru(txtNamaIkan.Text, harga);
 
+            // Muat ulang data untuk merefresh DataGrid
+            MuatDaftarIkan();
             ClearForm();
         }
 
         private void btnEdit_Click(object sender, RoutedEventArgs e)
         {
-            if (dataGridIkan.SelectedItem is Ikan selected)
+            if (dataGridIkan.SelectedItem is JenisIkan selected)
             {
-                if (!int.TryParse(txtHarga.Text, out int harga))
+                if (!double.TryParse(txtHarga.Text, out double hargaBaru))
                 {
                     MessageBox.Show("Harga harus berupa angka!", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                selected.IDIkan = txtIDIkan.Text;
-                selected.NamaIkan = txtNamaIkan.Text;
-                selected.Harga = harga;
-                dataGridIkan.Items.Refresh();
-                ClearForm();
+                // Cek apakah ada perubahan
+                if (selected.NamaIkan == txtNamaIkan.Text && selected.HargaPerKg == hargaBaru)
+                {
+                    MessageBox.Show("Tidak ada perubahan data yang dilakukan.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Hanya HargaPerKg yang bisa diubah via method statis yang ada di JenisIkan.cs
+                bool success = JenisIkan.UbahHargaIkan(selected.IDIkan, hargaBaru);
+
+                if (success)
+                {
+                    if (selected.NamaIkan != txtNamaIkan.Text)
+                    {
+                        MessageBox.Show("Nama Ikan tidak dapat diubah karena model JenisIkan.cs tidak menyediakan method untuk itu.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+
+                    // Muat ulang data untuk memastikan perubahan tercermin
+                    MuatDaftarIkan();
+                    MessageBox.Show("Harga ikan berhasil diperbarui.", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ClearForm();
+                }
+                else
+                {
+                    MessageBox.Show("Gagal menemukan ID Ikan untuk diubah.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             else
             {
@@ -74,14 +102,15 @@ namespace JalaNota
 
         private void btnDelete_Click(object sender, RoutedEventArgs e)
         {
-            if (dataGridIkan.SelectedItem is Ikan selected)
+            if (dataGridIkan.SelectedItem is JenisIkan selected)
             {
-                MessageBoxResult result = MessageBox.Show($"Yakin ingin menghapus {selected.NamaIkan}?",
+                MessageBoxResult result = MessageBox.Show($"Yakin ingin menghapus {selected.NamaIkan}? (Aksi ini tidak didukung oleh model JenisIkan.cs)",
                     "Konfirmasi Hapus", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    DaftarIkan.Remove(selected);
+                    // TODO: Perlu menambahkan metode statis HapusIkan(int IDIkan) di JenisIkan.cs
+                    MessageBox.Show("Penghapusan gagal karena model JenisIkan.cs tidak menyediakan method untuk menghapus data statis.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     ClearForm();
                 }
             }
@@ -93,11 +122,12 @@ namespace JalaNota
 
         private void dataGridIkan_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (dataGridIkan.SelectedItem is Ikan selected)
+            if (dataGridIkan.SelectedItem is JenisIkan selected)
             {
-                txtIDIkan.Text = selected.IDIkan;
+                // IDIkan dan HargaPerKg adalah properti di JenisIkan.cs
+                txtIDIkan.Text = selected.IDIkan.ToString();
                 txtNamaIkan.Text = selected.NamaIkan;
-                txtHarga.Text = selected.Harga.ToString();
+                txtHarga.Text = selected.HargaPerKg.ToString();
             }
         }
 
@@ -118,30 +148,24 @@ namespace JalaNota
 
         private void ManageSetoran_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Navigasi ke halaman 'Manage Setoran'");
+            ManageSetoran manageSetoranWindow = new ManageSetoran();
+            manageSetoranWindow.Show();
+            this.Close();
         }
 
         private void ManageNelayan_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Navigasi ke halaman 'Manage Nelayan'");
-            
         }
 
         private void ManageIkan_Click(object sender, RoutedEventArgs e)
         {
-            
+            // Tetap di halaman ini
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Logout berhasil!");
         }
-    }
-
-    public class Ikan
-    {
-        public string IDIkan { get; set; }
-        public string NamaIkan { get; set; }
-        public int Harga { get; set; }
     }
 }
