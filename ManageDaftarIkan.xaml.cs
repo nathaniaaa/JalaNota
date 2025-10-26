@@ -12,9 +12,16 @@ namespace JalaNota
         // ObservableCollection untuk menampilkan dan merefresh DataGrid
         public ObservableCollection<JenisIkan> DaftarIkanView { get; set; }
 
-        public ManageDaftarIkan()
+        // 1. Tambahkan field untuk menyimpan data admin
+        private Admin _adminLogin;
+
+        // 2. Ubah constructor untuk menerima objek Admin
+        public ManageDaftarIkan(Admin adminDariLogin)
         {
             InitializeComponent();
+
+            // Simpan data admin yang diterima
+            _adminLogin = adminDariLogin;
 
             DaftarIkanView = new ObservableCollection<JenisIkan>();
             MuatDaftarIkan();
@@ -148,14 +155,17 @@ namespace JalaNota
 
         private void ManageSetoran_Click(object sender, RoutedEventArgs e)
         {
-            ManageSetoran manageSetoranWindow = new ManageSetoran();
+            // 3. Gunakan data admin yang sudah disimpan saat pindah halaman
+            ManageSetoran manageSetoranWindow = new ManageSetoran(_adminLogin);
             manageSetoranWindow.Show();
             this.Close();
         }
 
         private void ManageNelayan_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Navigasi ke halaman 'Manage Nelayan'");
+            ManageNelayan manageNelayanWindow = new ManageNelayan(_adminLogin);
+            manageNelayanWindow.Show();
+            this.Close();
         }
 
         private void ManageIkan_Click(object sender, RoutedEventArgs e)
@@ -165,7 +175,9 @@ namespace JalaNota
 
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Logout berhasil!");
+            LoginNelayan loginWindow = new LoginNelayan();
+            loginWindow.Show();
+            this.Close();
         }
     }
 }

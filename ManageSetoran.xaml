@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:JalaNota"
         mc:Ignorable="d"
-        Title="ManageSetoran" Height="450" Width="800">
+        Title="ManageSetoran" Height="450" Width="800"
+        Background="#F7FBFF" WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <Style x:Key="RightAlignStyle" TargetType="TextBlock">

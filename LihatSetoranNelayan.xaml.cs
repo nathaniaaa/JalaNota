@@ -18,21 +18,22 @@ namespace JalaNota
     /// </summary>
     public partial class LihatSetoranNelayan : Window
     {
-        // Menyimpan data nelayan yang sedang 'login' secara hardcoded
-        private Nelayan currentNelayan = new Nelayan
-        {
-            IDNelayan = 1,
-            NamaNelayan = "Nelayan Satu" // Data ini diambil dari daftar statis di Nelayan.cs
-        };
+        // 1. Buat field privat untuk menyimpan data nelayan yang login
+        private Nelayan _nelayanLogin;
 
         // Model untuk DataGrid
         public ObservableCollection<SetoranNelayanView> DaftarSetoranView { get; set; }
 
-        public LihatSetoranNelayan()
+        // 2. Buat constructor baru yang menerima objek Nelayan
+        public LihatSetoranNelayan(Nelayan nelayanDariLogin)
         {
             InitializeComponent();
 
-            textBlockWelcome.Text = $"Selamat Datang Kembali, {currentNelayan.NamaNelayan}!";
+            // 3. Simpan data nelayan yang dikirim ke field privat
+            _nelayanLogin = nelayanDariLogin;
+
+            // 4. Gunakan data dari _nelayanLogin
+            textBlockWelcome.Text = $"Selamat Datang Kembali, {_nelayanLogin.NamaNelayan}!";
 
             DaftarSetoranView = new ObservableCollection<SetoranNelayanView>();
 
@@ -42,7 +43,7 @@ namespace JalaNota
             this.Loaded += Window_Loaded;
 
             // Opsional: Tampilkan nama nelayan di Title Bar
-            this.Title = $"Riwayat Setoran - {currentNelayan.NamaNelayan}";
+            this.Title = $"Riwayat Setoran - {_nelayanLogin .NamaNelayan}";
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -50,10 +51,17 @@ namespace JalaNota
             MuatDaftarSetoran();
         }
 
+        private void Logout_Click(object sender, RoutedEventArgs e)
+        {
+            LoginNelayan loginWindow = new LoginNelayan();
+            loginWindow.Show();
+            this.Close();
+        }
+
         private void MuatDaftarSetoran()
         {
             // Ambil ID nelayan dari objek hardcoded
-            int idNelayanSaatIni = this.currentNelayan.IDNelayan;
+            int idNelayanSaatIni = this._nelayanLogin.IDNelayan;
 
             DaftarSetoranView.Clear();
 
@@ -67,7 +75,7 @@ namespace JalaNota
 
             if (!setoranFiltered.Any())
             {
-                MessageBox.Show($"Nelayan {currentNelayan.NamaNelayan} belum memiliki riwayat setoran.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Nelayan {_nelayanLogin.NamaNelayan} belum memiliki riwayat setoran.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 

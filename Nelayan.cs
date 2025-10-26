@@ -98,5 +98,48 @@ namespace JalaNota
                 Console.WriteLine("---------------------------------\n");
             }
         }
+
+        public static void TambahNelayanBaru(string nama, string username, string password)
+        {
+            // Membuat ID baru secara otomatis
+            int newId = daftarNelayan.Count > 0 ? daftarNelayan.Max(n => n.IDNelayan) + 1 : 1;
+
+            daftarNelayan.Add(new Nelayan
+            {
+                IDNelayan = newId,
+                NamaNelayan = nama,
+                UsnNelayan = username,
+                PasswordNelayan = password
+            });
+        }
+
+        public static bool UbahNelayan(int id, string nama, string username, string password)
+        {
+            // Cari nelayan berdasarkan ID
+            Nelayan nelayan = daftarNelayan.FirstOrDefault(n => n.IDNelayan == id);
+
+            if (nelayan != null)
+            {
+                // Jika ditemukan, perbarui datanya
+                nelayan.NamaNelayan = nama;
+                nelayan.UsnNelayan = username;
+                nelayan.PasswordNelayan = password;
+                return true; // Berhasil
+            }
+
+            return false; // Gagal karena tidak ditemukan
+        }
+
+        public static void HapusNelayan(int id)
+        {
+            // Cari nelayan berdasarkan ID
+            Nelayan nelayan = daftarNelayan.FirstOrDefault(n => n.IDNelayan == id);
+
+            if (nelayan != null)
+            {
+                // Jika ditemukan, hapus dari daftar
+                daftarNelayan.Remove(nelayan);
+            }
+        }
     }
 }

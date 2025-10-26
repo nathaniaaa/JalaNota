@@ -58,20 +58,34 @@
     <Compile Include="LihatSetoranNelayan.xaml.cs">
       <DependentUpon>LihatSetoranNelayan.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LoginAdmin.xaml.cs">
+      <DependentUpon>LoginAdmin.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoginNelayan.xaml.cs">
+      <DependentUpon>LoginNelayan.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ManageDaftarIkan.xaml.cs">
       <DependentUpon>ManageDaftarIkan.xaml</DependentUpon>
     </Compile>
     <Compile Include="LihatHargaIkan%28non-admin%29.xaml.cs">
       <DependentUpon>LihatHargaIkan%28non-admin%29.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ManageNelayan.xaml.cs">
+      <DependentUpon>ManageNelayan.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ManageSetoran.xaml.cs">
       <DependentUpon>ManageSetoran.xaml</DependentUpon>
     </Compile>
-    <Compile Include="RegisterNelayan.xaml.cs">
-      <DependentUpon>RegisterNelayan.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Setoran.cs" />
     <Page Include="LihatSetoranNelayan.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LoginAdmin.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LoginNelayan.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -83,25 +97,17 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Compile Include="Admin.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="JenisIkan.cs" />
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Page Include="ManageSetoran.xaml">
+    <Page Include="ManageNelayan.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="RegisterNelayan.xaml">
+    <Page Include="ManageSetoran.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -132,6 +138,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Jala Nota.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="martin-katler-vQSiR1EPTTU-unsplash.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Logo Jala Nota.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Cover Jala Nota.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -5,12 +5,37 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:JalaNota"
         mc:Ignorable="d"
-        Title="LihatSetoranNelayan" Height="450" Width="800">
+        Title="LihatSetoranNelayan" Height="450" Width="800"
+        Background="#F7FBFF" WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <Style x:Key="RightAlignStyle" TargetType="TextBlock">
             <Setter Property="TextAlignment" Value="Right"/>
             <Setter Property="Padding" Value="0,0,8,0"/>
+        </Style>
+
+        <Style x:Key="NavActionStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#D9534F"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FADBD8"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
 
@@ -29,6 +54,13 @@
                        Foreground="#1E3A5F"
                        DockPanel.Dock="Left"
                        VerticalAlignment="Center"/>
+                <Button Grid.Column="1" 
+                            Content="Logout"
+                            Style="{StaticResource NavActionStyle}" 
+                            Click="Logout_Click"
+                            VerticalAlignment="Center"
+                            DockPanel.Dock="Right" HorizontalAlignment="Right">
+                </Button>
             </DockPanel>
         </Border>
 
