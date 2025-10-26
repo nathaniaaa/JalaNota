@@ -14,28 +14,43 @@ namespace JalaNota
         public string UsnNelayan { get; set; }
         public string PasswordNelayan { get; set; }
 
+        // Daftar nelayan statis
+        private static List<Nelayan> daftarNelayan = new List<Nelayan>
+        {
+            new Nelayan { IDNelayan = 1, NamaNelayan = "Nelayan Satu", UsnNelayan = "nelayanSatu", PasswordNelayan = "satu123" },
+            new Nelayan { IDNelayan = 2, NamaNelayan = "Nelayan Dua", UsnNelayan = "nelayanDua", PasswordNelayan = "dua123" }
+        };
+
         // Metode
         public Boolean Login(string username, string password)
         {
-            // TODO: ganti dummy dengan data dari database
-            if (username == "nelayanSatu" && password == "satu123")
+            // Cari nelayan berdasarkan username dan password
+            Nelayan nelayanLogin = daftarNelayan.FirstOrDefault(n => n.UsnNelayan == username && n.PasswordNelayan == password);
+
+            if (nelayanLogin != null)
             {
-                IDNelayan = 1;
-                NamaNelayan = "Nelayan Satu";
-                UsnNelayan = "nelayanSatu";
-                return true;
-            }
-            else if (username == "nelayanDua" && password == "dua123")
-            {
-                IDNelayan = 2;
-                NamaNelayan = "Nelayan Dua";
-                UsnNelayan = "nelayanDua";
+                // Jika ditemukan, isi properti objek Nelayan saat ini
+                this.IDNelayan = nelayanLogin.IDNelayan;
+                this.NamaNelayan = nelayanLogin.NamaNelayan;
+                this.UsnNelayan = nelayanLogin.UsnNelayan;
                 return true;
             }
             else
             {
                 return false;
             }
+        }
+
+        // Metode statis untuk melihat semua nelayan (digunakan oleh Admin)
+        public static List<Nelayan> LihatSemuaNelayan()
+        {
+            return daftarNelayan;
+        }
+
+        // Metode statis untuk mendapatkan Nelayan berdasarkan ID
+        public static Nelayan GetNelayanById(int idNelayan)
+        {
+            return daftarNelayan.FirstOrDefault(n => n.IDNelayan == idNelayan);
         }
 
         public void LihatHargaIkan()

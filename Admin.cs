@@ -71,7 +71,7 @@ namespace JalaNota
             JenisIkan.UbahHargaIkan(idIkan, hargaBaru);
             Console.WriteLine($"--- Admin {this.NamaAdmin} mengubah harga ikan ID: {idIkan} ---");
         }
-        public void CatatSetoran(int idNelayan, int idIkan, double berat)
+        public void CatatSetoran(int idNelayan, int idIkan, double berat, DateTime waktuSetor)
         {
             JenisIkan ikan = JenisIkan.GetJenisIkanById(idIkan);
             if (ikan == null)
@@ -87,7 +87,7 @@ namespace JalaNota
             setoranBaru.IDIkan = idIkan;
             setoranBaru.BeratKg = berat;
             setoranBaru.IDAdmin = this.IDAdmin;
-            setoranBaru.WaktuSetor = DateTime.Now;
+            setoranBaru.WaktuSetor = waktuSetor;
             setoranBaru.HargaTotal = totalHarga;
 
             Setoran.TambahSetoranBaru(setoranBaru);
@@ -99,6 +99,37 @@ namespace JalaNota
             Console.WriteLine($"Berat             : {berat} Kg");
             Console.WriteLine($"Total Harga       : Rp{totalHarga}");
             Console.WriteLine("--------------------------------\n");
+        }
+        public bool EditSetoran(int idSetoran, int idNelayan, int idIkan, double berat, DateTime waktuSetor)
+        {
+            JenisIkan ikan = JenisIkan.GetJenisIkanById(idIkan);
+            if (ikan == null)
+            {
+                Console.WriteLine($"Error: Ikan dengan ID {idIkan} tidak ditemukan saat edit.");
+                return false;
+            }
+
+            Setoran setoranModel = new Setoran(); // Objek sementara untuk memanggil HitungTotalHarga
+            double totalHarga = setoranModel.HitungTotalHarga(berat, ikan.HargaPerKg);
+
+            // Panggil metode statis UbahSetoran
+            bool sukses = Setoran.UbahSetoran(idSetoran, idNelayan, idIkan, berat, waktuSetor, this.IDAdmin, totalHarga);
+
+            if (sukses)
+            {
+                Console.WriteLine("\n--- Setoran Berhasil Diperbarui ---");
+                Console.WriteLine($"Diperbarui oleh Admin: {this.NamaAdmin}");
+                Console.WriteLine($"ID Setoran        : {idSetoran}");
+                Console.WriteLine($"Ikan              : {ikan.NamaIkan}");
+                Console.WriteLine($"Berat             : {berat} Kg");
+                Console.WriteLine($"Total Harga       : Rp{totalHarga}");
+                Console.WriteLine("--------------------------------\n");
+            }
+            else
+            {
+                Console.WriteLine($"Error: Setoran ID {idSetoran} tidak ditemukan untuk diubah.");
+            }
+            return sukses;
         }
     }
 }
