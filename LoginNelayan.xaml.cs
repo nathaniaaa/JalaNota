@@ -23,5 +23,63 @@ namespace JalaNota
         {
             InitializeComponent();
         }
+
+        private void PilihLoginBtnNelayan_Click(object sender, RoutedEventArgs e)
+        {
+            // Tetap di halaman ini
+        }
+        private void PilihLoginBtnAdmin_Click(object sender, RoutedEventArgs e)
+        {
+            LoginAdmin loginAdminWindow = new LoginAdmin();
+            loginAdminWindow.Show();
+            this.Close();
+        }
+        private void LoginNlyn_Click(object sender, RoutedEventArgs e)
+        {
+            string username = tbUsername.Text;
+            string password = tbPassword.Password;
+            Nelayan nelayan = new Nelayan();
+            bool loginSuccess = nelayan.Login(username, password);
+            if (loginSuccess)
+            {
+                MessageBox.Show($"Selamat datang, {nelayan.NamaNelayan}!", "Login Berhasil", MessageBoxButton.OK, MessageBoxImage.Information);
+                LihatSetoranNelayan manageSetoranNelayanWindow = new LihatSetoranNelayan(nelayan);
+                manageSetoranNelayanWindow.Show();
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Username atau password salah. Silakan coba lagi.", "Login Gagal", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private void tbPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            // Cek jika PasswordBox kosong
+            if (string.IsNullOrEmpty(tbPassword.Password))
+            {
+                // Jika kosong, tampilkan placeholder
+                PasswordPlaceholder.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                // Jika ada isinya, sembunyikan placeholder
+                PasswordPlaceholder.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void tbUsername_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Cek jika TextBox username kosong
+            if (string.IsNullOrEmpty(tbUsername.Text))
+            {
+                // Jika kosong, tampilkan placeholder
+                UsernamePlaceholder.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                // Jika ada isinya, sembunyikan placeholder
+                UsernamePlaceholder.Visibility = Visibility.Collapsed;
+            }
+        }
     }
 }

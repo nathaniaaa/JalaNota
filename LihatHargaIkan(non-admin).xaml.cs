@@ -38,7 +38,9 @@ namespace JalaNota
 
         private void Login_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("nnti masuk ke halaman login");
+            LoginNelayan loginNelayanWindow = new LoginNelayan();
+            loginNelayanWindow.Show();
+            this.Close();
         }
 
         private void dataGridIkan_SelectionChanged(object sender, SelectionChangedEventArgs e)

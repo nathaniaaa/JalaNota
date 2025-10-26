@@ -12,12 +12,16 @@ namespace JalaNota
         // Model untuk DataGrid
         public ObservableCollection<SetoranView> DaftarSetoranView { get; set; }
 
-        // Variabel untuk Admin yang sedang login (ID 1: Admin Kay)
-        private Admin currentAdmin = new Admin { IDAdmin = 1, NamaAdmin = "Admin Kay", UsernameAdmin = "adminKay" };
+        // 1. Buat field privat untuk menyimpan data admin yang login
+        private Admin _adminLogin;
 
-        public ManageSetoran()
+        // 2. Buat constructor baru yang menerima objek Admin
+        public ManageSetoran(Admin adminDariLogin)
         {
             InitializeComponent();
+
+            // 3. Simpan data admin yang dikirim ke field privat
+            _adminLogin = adminDariLogin;
 
             DaftarSetoranView = new ObservableCollection<SetoranView>();
             dataGridSetoran.ItemsSource = DaftarSetoranView;
@@ -106,7 +110,7 @@ namespace JalaNota
             DateTime tanggalSetoran = dpTanggalSetoran.SelectedDate.Value.Date;
 
             // 3. Catat Setoran
-            currentAdmin.CatatSetoran(idNelayan, idIkan, berat, tanggalSetoran);
+            _adminLogin.CatatSetoran(idNelayan, idIkan, berat, tanggalSetoran);
 
             // 4. Perbarui Tampilan
             MuatDaftarSetoran();
@@ -145,7 +149,7 @@ namespace JalaNota
             DateTime tanggalSetoran = dpTanggalSetoran.SelectedDate.Value.Date;
 
             // 4. Edit Setoran
-            bool sukses = currentAdmin.EditSetoran(idSetoran, idNelayan, idIkan, berat, tanggalSetoran);
+            bool sukses = _adminLogin.EditSetoran(idSetoran, idNelayan, idIkan, berat, tanggalSetoran);
 
             // 5. Perbarui Tampilan
             if (sukses)
@@ -215,13 +219,28 @@ namespace JalaNota
         }
 
         // --- Navbar Clicks ---
-        private void ManageSetoran_Click(object sender, RoutedEventArgs e) { /* Tetap di halaman ini */ }
-        private void ManageNelayan_Click(object sender, RoutedEventArgs e) { MessageBox.Show("Navigasi ke halaman 'Manage Nelayan'"); }
+        private void ManageSetoran_Click(object sender, RoutedEventArgs e) 
+        { 
+            // Tetap di halaman ini 
+        }
+        private void ManageNelayan_Click(object sender, RoutedEventArgs e) 
+        {
+            ManageNelayan manageNelayanWindow = new ManageNelayan(_adminLogin);
+            manageNelayanWindow.Show();
+            this.Close();
+        }
         private void ManageIkan_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Navigasi ke halaman 'Manage Daftar Ikan'");
+            ManageDaftarIkan manageDaftarIkanWindow = new ManageDaftarIkan(_adminLogin);
+            manageDaftarIkanWindow.Show();
+            this.Close();
         }
-        private void Logout_Click(object sender, RoutedEventArgs e) { this.Close(); }
+        private void Logout_Click(object sender, RoutedEventArgs e)
+        {
+            LoginNelayan loginWindow = new LoginNelayan();
+            loginWindow.Show();
+            this.Close();
+        }
     }
 
     // Kelas Model yang digunakan untuk DataGrid (View Model)

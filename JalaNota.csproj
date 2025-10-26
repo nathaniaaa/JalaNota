@@ -58,6 +58,9 @@
     <Compile Include="LihatSetoranNelayan.xaml.cs">
       <DependentUpon>LihatSetoranNelayan.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LoginAdmin.xaml.cs">
+      <DependentUpon>LoginAdmin.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LoginNelayan.xaml.cs">
       <DependentUpon>LoginNelayan.xaml</DependentUpon>
     </Compile>
@@ -67,14 +70,18 @@
     <Compile Include="LihatHargaIkan%28non-admin%29.xaml.cs">
       <DependentUpon>LihatHargaIkan%28non-admin%29.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ManageNelayan.xaml.cs">
+      <DependentUpon>ManageNelayan.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ManageSetoran.xaml.cs">
       <DependentUpon>ManageSetoran.xaml</DependentUpon>
     </Compile>
-    <Compile Include="RegisterNelayan.xaml.cs">
-      <DependentUpon>RegisterNelayan.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Setoran.cs" />
     <Page Include="LihatSetoranNelayan.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LoginAdmin.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -96,11 +103,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="JenisIkan.cs" />
-    <Page Include="ManageSetoran.xaml">
+    <Page Include="ManageNelayan.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="RegisterNelayan.xaml">
+    <Page Include="ManageSetoran.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -140,6 +147,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Logo Jala Nota.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Cover Jala Nota.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

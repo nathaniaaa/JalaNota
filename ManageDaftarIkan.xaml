@@ -1,7 +1,7 @@
 ﻿<Window x:Class="JalaNota.ManageDaftarIkan"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Manage Daftar Ikan" Height="520" Width="701"
+        Title="Manage Daftar Ikan" Height="450" Width="800"
         Background="#F7FBFF" WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
