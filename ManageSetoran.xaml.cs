@@ -4,93 +4,93 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Threading.Tasks; 
 
 namespace JalaNota
 {
     public partial class ManageSetoran : Window
     {
-        // Model untuk DataGrid
         public ObservableCollection<SetoranView> DaftarSetoranView { get; set; }
-
-        // 1. Buat field privat untuk menyimpan data admin yang login
         private Admin _adminLogin;
+        private Dictionary<int, string> _kamusNelayan = new Dictionary<int, string>();
+        private Dictionary<int, JenisIkan> _kamusIkan = new Dictionary<int, JenisIkan>();
 
-        // 2. Buat constructor baru yang menerima objek Admin
         public ManageSetoran(Admin adminDariLogin)
         {
             InitializeComponent();
-
-            // 3. Simpan data admin yang dikirim ke field privat
             _adminLogin = adminDariLogin;
-
             DaftarSetoranView = new ObservableCollection<SetoranView>();
             dataGridSetoran.ItemsSource = DaftarSetoranView;
-
-            this.Loaded += Window_Loaded;
+            this.Loaded += Window_Loaded_Async;
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void Window_Loaded_Async(object sender, RoutedEventArgs e)
         {
-            // 1. Isi ComboBox Nelayan dan Ikan
-            IsiComboBoxNelayan();
-            IsiComboBoxIkan();
-
-            // 2. Muat dan Tampilkan Data di DataGrid (Mengambil data dari Setoran.cs)
-            MuatDaftarSetoran();
-
-            // Set tanggal hari ini secara default
+            await InisialisasiDataHalaman();
             dpTanggalSetoran.SelectedDate = DateTime.Now.Date;
         }
-
-        private void IsiComboBoxNelayan()
+        private async Task InisialisasiDataHalaman()
         {
-            // Data Nelayan diambil dari metode statis di Nelayan.cs
-            var daftarNelayan = Nelayan.LihatSemuaNelayan();
-            cmbNamaNelayan.ItemsSource = daftarNelayan;
-            // XAML sudah diatur dengan DisplayMemberPath="NamaNelayan" dan SelectedValuePath="IDNelayan"
-        }
-
-        private void IsiComboBoxIkan()
-        {
-            // Data Ikan dari JenisIkan.cs
-            var daftarIkan = JenisIkan.LihatSemuaJenisIkan();
-            cmbNamaIkan.ItemsSource = daftarIkan;
-        }
-
-        private void MuatDaftarSetoran()
-        {
-            DaftarSetoranView.Clear();
-            var semuaSetoran = Setoran.LihatSemuaSetoran().OrderBy(s => s.IDSetoran);
-
-            foreach (var s in semuaSetoran)
+            try
             {
-                // Ambil data pendukung
-                var ikan = JenisIkan.GetJenisIkanById(s.IDIkan);
+                // ambil data Ikan, simpan di kamus, isi ComboBox
+                var ikanResponse = await SupabaseClient.Instance.From<JenisIkan>().Get();
+                _kamusIkan = ikanResponse.Models.ToDictionary(i => i.IDIkan);
+                cmbNamaIkan.ItemsSource = ikanResponse.Models;
 
-                // Cari Nama Nelayan menggunakan metode GetNelayanById()
-                var nelayan = Nelayan.GetNelayanById(s.IDNelayan);
-                string namaNelayan = nelayan?.NamaNelayan ?? $"ID Nelayan {s.IDNelayan}";
+                // ambil data Nelayan, simpan di kamus, isi ComboBox
+                var nelayanResponse = await SupabaseClient.Instance.From<Nelayan>().Get();
+                _kamusNelayan = nelayanResponse.Models.ToDictionary(n => n.IDNelayan, n => n.NamaNelayan);
+                cmbNamaNelayan.ItemsSource = nelayanResponse.Models;
 
-                DaftarSetoranView.Add(new SetoranView
-                {
-                    IDSetoran = s.IDSetoran,
-                    // Mengambil hanya tanggal untuk tampilan DataGrid
-                    Tanggal = s.WaktuSetor.ToShortDateString(),
-                    IDNelayan = s.IDNelayan,
-                    IDIkan = s.IDIkan,
-                    NamaNelayan = namaNelayan,
-                    NamaIkan = ikan?.NamaIkan ?? "N/A",
-                    Berat = s.BeratKg,
-                    Total = s.HargaTotal
-                });
+                // muat data setoran
+                await MuatDaftarSetoran();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Gagal memuat data awal: {ex.Message}", "Error Koneksi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        // --- CRUD Buttons ---
-
-        private void btnInput_Click(object sender, RoutedEventArgs e)
+        private async Task MuatDaftarSetoran()
         {
-            // 1. Validasi Input
+            DaftarSetoranView.Clear();
+
+            try
+            {
+                var setoranResponse = await SupabaseClient.Instance.From<Setoran>()
+                                    .Order("IDSetoran", Postgrest.Constants.Ordering.Descending)
+                                    .Get();
+
+                foreach (var s in setoranResponse.Models)
+                {
+                    _kamusIkan.TryGetValue(s.IDIkan, out JenisIkan ikan);
+                    _kamusNelayan.TryGetValue(s.IDNelayan, out string namaNelayan);
+
+                    DaftarSetoranView.Add(new SetoranView
+                    {
+                        IDSetoran = s.IDSetoran,
+                        Tanggal = s.WaktuSetor.ToShortDateString(),
+                        WaktuSetor = s.WaktuSetor, 
+                        IDNelayan = s.IDNelayan,
+                        IDIkan = s.IDIkan,
+                        NamaNelayan = namaNelayan ?? $"ID {s.IDNelayan}",
+                        NamaIkan = ikan?.NamaIkan ?? "N/A",
+                        Berat = s.BeratKg,
+                        Total = s.HargaTotal
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Gagal memuat daftar setoran: {ex.Message}", "Error Koneksi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // CRUD
+        private async void btnInput_Click(object sender, RoutedEventArgs e)
+        {
+            // validasi
             if (cmbNamaNelayan.SelectedValue == null || cmbNamaIkan.SelectedValue == null ||
                 !dpTanggalSetoran.SelectedDate.HasValue || string.IsNullOrWhiteSpace(txtBerat.Text))
             {
@@ -104,74 +104,122 @@ namespace JalaNota
                 return;
             }
 
-            // 2. Ambil Nilai
-            int idNelayan = (int)cmbNamaNelayan.SelectedValue;
-            int idIkan = (int)cmbNamaIkan.SelectedValue;
-            DateTime tanggalSetoran = dpTanggalSetoran.SelectedDate.Value.Date;
+            try
+            {
+                int idNelayan = (int)cmbNamaNelayan.SelectedValue;
+                int idIkan = (int)cmbNamaIkan.SelectedValue;
+                DateTime tanggalSetoran = dpTanggalSetoran.SelectedDate.Value.Date;
 
-            // 3. Catat Setoran
-            _adminLogin.CatatSetoran(idNelayan, idIkan, berat, tanggalSetoran);
+                // catat setoran
+                _kamusIkan.TryGetValue(idIkan, out JenisIkan ikan);
+                if (ikan == null)
+                {
+                    MessageBox.Show("Error: Data ikan tidak ditemukan.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
-            // 4. Perbarui Tampilan
-            MuatDaftarSetoran();
-            MessageBox.Show("Setoran baru berhasil dicatat!", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+                double totalHarga = berat * ikan.HargaPerKg; // hitung total
 
-            // 5. Reset Form
-            ClearForm();
+                var setoranBaru = new Setoran
+                {
+                    IDNelayan = idNelayan,
+                    IDIkan = idIkan,
+                    IDAdmin = _adminLogin.IDAdmin, // ambil dari admin yg login
+                    WaktuSetor = tanggalSetoran,
+                    BeratKg = berat,
+                    HargaTotal = totalHarga
+                };
+
+                await SupabaseClient.Instance.From<Setoran>().Insert(setoranBaru);
+
+                // perbarui Tampilan
+                await MuatDaftarSetoran();
+                MessageBox.Show("Setoran baru berhasil dicatat!", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+                ClearForm();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Gagal mencatat setoran: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        private void btnEdit_Click(object sender, RoutedEventArgs e)
+        // edit 
+        private async void btnEdit_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Validasi ID Setoran
             if (!int.TryParse(txtIDSetoran.Text, out int idSetoran) || idSetoran <= 0)
             {
                 MessageBox.Show("Pilih data setoran dari tabel untuk mengedit.", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // 2. Validasi Input Data
-            if (cmbNamaNelayan.SelectedValue == null || cmbNamaIkan.SelectedValue == null ||
-                !dpTanggalSetoran.SelectedDate.HasValue || string.IsNullOrWhiteSpace(txtBerat.Text))
+            if (cmbNamaNelayan.SelectedValue == null || cmbNamaIkan.SelectedValue == null || !dpTanggalSetoran.SelectedDate.HasValue || string.IsNullOrWhiteSpace(txtBerat.Text))
             {
                 MessageBox.Show("Semua kolom harus diisi dengan benar.", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!double.TryParse(txtBerat.Text, out double berat) || berat <= 0)
+            try
             {
-                MessageBox.Show("Berat (kg) harus berupa angka positif yang valid.", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+                int idNelayan = (int)cmbNamaNelayan.SelectedValue;
+                int idIkan = (int)cmbNamaIkan.SelectedValue;
+                DateTime tanggalSetoran = dpTanggalSetoran.SelectedDate.Value.Date;
+                double.TryParse(txtBerat.Text, out double berat);
 
-            // 3. Ambil Nilai
-            int idNelayan = (int)cmbNamaNelayan.SelectedValue;
-            int idIkan = (int)cmbNamaIkan.SelectedValue;
-            DateTime tanggalSetoran = dpTanggalSetoran.SelectedDate.Value.Date;
+                // edit setoran
+                _kamusIkan.TryGetValue(idIkan, out JenisIkan ikan);
+                if (ikan == null)
+                {
+                    MessageBox.Show("Error: Data ikan tidak ditemukan.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
-            // 4. Edit Setoran
-            bool sukses = _adminLogin.EditSetoran(idSetoran, idNelayan, idIkan, berat, tanggalSetoran);
+                double totalHarga = berat * ikan.HargaPerKg; // Hitung ulang total
 
-            // 5. Perbarui Tampilan
-            if (sukses)
-            {
-                MuatDaftarSetoran();
+                await SupabaseClient.Instance.From<Setoran>()
+                    .Where(s => s.IDSetoran == idSetoran)
+                    .Set(s => s.IDNelayan, idNelayan)
+                    .Set(s => s.IDIkan, idIkan)
+                    .Set(s => s.WaktuSetor, tanggalSetoran)
+                    .Set(s => s.BeratKg, berat)
+                    .Set(s => s.HargaTotal, totalHarga)
+                    .Set(s => s.IDAdmin, _adminLogin.IDAdmin) // Catat siapa yg edit
+                    .Update();
+
+                // perbarui Tampilan
+                await MuatDaftarSetoran();
                 MessageBox.Show($"Setoran ID {idSetoran} berhasil diperbarui!", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
                 ClearForm();
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Gagal memperbarui setoran. ID Setoran mungkin tidak valid atau ikan tidak ditemukan.", "Gagal", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Gagal memperbarui setoran: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void btnDelete_Click(object sender, RoutedEventArgs e)
+        // delete
+        private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
-            // Logika DELETE (masih placeholder karena model statis tidak mendukung)
             if (dataGridSetoran.SelectedItem is SetoranView selected)
             {
-                MessageBoxResult result = MessageBox.Show($"Yakin ingin menghapus Setoran ID {selected.IDSetoran}? (Fitur ini belum diimplementasikan)",
-                    "Konfirmasi Hapus", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                MessageBoxResult result = MessageBox.Show($"Yakin ingin menghapus Setoran ID {selected.IDSetoran}?",
+                        "Konfirmasi Hapus", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        await SupabaseClient.Instance.From<Setoran>()
+                            .Where(s => s.IDSetoran == selected.IDSetoran)
+                            .Delete();
+
+                        await MuatDaftarSetoran();
+                        ClearForm();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Gagal menghapus setoran: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
             }
             else
             {
@@ -183,23 +231,11 @@ namespace JalaNota
         {
             if (dataGridSetoran.SelectedItem is SetoranView selected)
             {
-                // Mengisi form dari data yang dipilih
                 txtIDSetoran.Text = selected.IDSetoran.ToString();
                 txtBerat.Text = selected.Berat.ToString();
-
-                // Mengisi DatePicker
-                if (DateTime.TryParse(selected.Tanggal, out DateTime parsedDate))
-                {
-                    dpTanggalSetoran.SelectedDate = parsedDate;
-                }
-
-                // Memilih item di ComboBox berdasarkan ID
+                dpTanggalSetoran.SelectedDate = selected.WaktuSetor; // gunakan data DateTime asli
                 cmbNamaNelayan.SelectedValue = selected.IDNelayan;
                 cmbNamaIkan.SelectedValue = selected.IDIkan;
-            }
-            else
-            {
-                ClearForm();
             }
         }
 
@@ -218,12 +254,9 @@ namespace JalaNota
             dataGridSetoran.UnselectAll();
         }
 
-        // --- Navbar Clicks ---
-        private void ManageSetoran_Click(object sender, RoutedEventArgs e) 
-        { 
-            // Tetap di halaman ini 
-        }
-        private void ManageNelayan_Click(object sender, RoutedEventArgs e) 
+        // navbar
+        private void ManageSetoran_Click(object sender, RoutedEventArgs e) { }
+        private void ManageNelayan_Click(object sender, RoutedEventArgs e)
         {
             ManageNelayan manageNelayanWindow = new ManageNelayan(_adminLogin);
             manageNelayanWindow.Show();
@@ -243,12 +276,12 @@ namespace JalaNota
         }
     }
 
-    // Kelas Model yang digunakan untuk DataGrid (View Model)
+    // Kelas Model (View Model)
     public class SetoranView
     {
         public int IDSetoran { get; set; }
-        public string Tanggal { get; set; } // Untuk tampilan di DataGrid (String)
-        public DateTime WaktuSetor { get; set; } 
+        public string Tanggal { get; set; }
+        public DateTime WaktuSetor { get; set; }
         public int IDNelayan { get; set; }
         public int IDIkan { get; set; }
         public string NamaNelayan { get; set; }

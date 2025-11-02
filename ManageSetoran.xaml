@@ -218,11 +218,11 @@
                       SelectionChanged="dataGridSetoran_SelectionChanged">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="ID Setoran" Binding="{Binding IDSetoran}" Width="100"/>
-                                <DataGridTextColumn Header="Tanggal" Binding="{Binding Tanggal}" Width="100"/>
+                                <DataGridTextColumn Header="Tanggal" Binding="{Binding WaktuSetor}" Width="100"/>
                                 <DataGridTextColumn Header="Nama Nelayan" Binding="{Binding NamaNelayan}" Width="*"/>
                                 <DataGridTextColumn Header="Nama Ikan" Binding="{Binding NamaIkan}" Width="150"/>
-                                <DataGridTextColumn Header="Berat (kg)" Binding="{Binding Berat}" Width="80"/>
-                                <DataGridTextColumn Header="Harga Total Setoran" Binding="{Binding Total}" Width="150" ElementStyle="{StaticResource RightAlignStyle}"/>
+                                <DataGridTextColumn Header="Berat (kg)" Binding="{Binding BeratKg}" Width="80"/>
+                                <DataGridTextColumn Header="Harga Total Setoran" Binding="{Binding HargaTotal}" Width="150" ElementStyle="{StaticResource RightAlignStyle}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>

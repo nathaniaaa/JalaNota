@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Linq; 
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading.Tasks; 
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -14,9 +14,6 @@ using System.Windows.Shapes;
 
 namespace JalaNota
 {
-    /// <summary>
-    /// Interaction logic for LoginNelayan.xaml
-    /// </summary>
     public partial class LoginNelayan : Window
     {
         public LoginNelayan()
@@ -26,7 +23,6 @@ namespace JalaNota
 
         private void PilihLoginBtnNelayan_Click(object sender, RoutedEventArgs e)
         {
-            // Tetap di halaman ini
         }
         private void PilihLoginBtnAdmin_Click(object sender, RoutedEventArgs e)
         {
@@ -34,22 +30,40 @@ namespace JalaNota
             loginAdminWindow.Show();
             this.Close();
         }
-        private void LoginNlyn_Click(object sender, RoutedEventArgs e)
+
+        private async void LoginNlyn_Click(object sender, RoutedEventArgs e)
         {
             string username = tbUsername.Text;
             string password = tbPassword.Password;
-            Nelayan nelayan = new Nelayan();
-            bool loginSuccess = nelayan.Login(username, password);
-            if (loginSuccess)
+
+            try
             {
-                MessageBox.Show($"Selamat datang, {nelayan.NamaNelayan}!", "Login Berhasil", MessageBoxButton.OK, MessageBoxImage.Information);
-                LihatSetoranNelayan manageSetoranNelayanWindow = new LihatSetoranNelayan(nelayan);
-                manageSetoranNelayanWindow.Show();
-                this.Close();
+                // ambil data dari Supabase
+                var response = await SupabaseClient.Instance.From<Nelayan>()
+                    .Where(n => n.UsnNelayan == username && n.PasswordNelayan == password)
+                    .Get();
+
+                // ambil data nelayan pertama (jika ada)
+                var nelayan = response.Models.FirstOrDefault();
+
+                // cek apakah nelayan ditemukan
+                if (nelayan != null) // jika 'nelayan' tidak null, login berhasil
+                {
+                    MessageBox.Show($"Selamat datang, {nelayan.NamaNelayan}!", "Login Berhasil", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // kirim objek 'nelayan' (yang sudah berisi data) ke halaman berikutnya
+                    LihatSetoranNelayan riwayatWindow = new LihatSetoranNelayan(nelayan);
+                    riwayatWindow.Show();
+                    this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Username atau password salah. Silakan coba lagi.", "Login Gagal", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Username atau password salah. Silakan coba lagi.", "Login Gagal", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Terjadi error koneksi: {ex.Message}", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         private void tbPassword_PasswordChanged(object sender, RoutedEventArgs e)

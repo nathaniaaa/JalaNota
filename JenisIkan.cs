@@ -1,57 +1,33 @@
-﻿using System;
+﻿using Postgrest.Attributes;
+using Postgrest.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace JalaNota
 {
-    public class JenisIkan
+    [Table("JenisIkan")]
+    public class JenisIkan : BaseModel
     {
-        // Properti
+        [PrimaryKey("IDIkan")]
         public int IDIkan { get; set; }
+
+        [Column("NamaIkan")]
         public string NamaIkan { get; set; }
-        public double HargaPerKg { get; set; }
 
-        // TODO: ganti dummy dengan data dari database
-        private static List<JenisIkan> daftarIkan = new List<JenisIkan>
-        {
-            new JenisIkan { IDIkan = 1, NamaIkan = "Tuna", HargaPerKg = 30000 },
-            new JenisIkan { IDIkan = 2, NamaIkan = "Tongkol", HargaPerKg = 25000 },
-            new JenisIkan { IDIkan = 3, NamaIkan = "Cakalang", HargaPerKg = 28000 }
-        };
+        [Column("HargaPerKg")]
+        public double HargaPerKg { get; set; } 
 
-        // Metode
-        public static List<JenisIkan> LihatSemuaJenisIkan()
+        [JsonIgnore] 
+        public string HargaFormatted
         {
-            return daftarIkan;
-        }
-
-        public static JenisIkan GetJenisIkanById(int idIkan)
-        {
-            // Cari ikan di dalam daftar berdasarkan ID
-            return daftarIkan.FirstOrDefault(i => i.IDIkan == idIkan);
-        }
-
-        public static void TambahIkanBaru(string nama, double harga)
-        {
-            // Membuat ID baru secara otomatis
-            int newId = daftarIkan.Count > 0 ? daftarIkan.Max(i => i.IDIkan) + 1 : 1;
-            daftarIkan.Add(new JenisIkan { IDIkan = newId, NamaIkan = nama, HargaPerKg = harga });
-        }
-
-        public static bool UbahHargaIkan(int idIkan, double hargaBaru)
-        {
-            // Cari ikan di dalam daftar berdasarkan ID
-            JenisIkan ikan = GetJenisIkanById(idIkan);
-            if (ikan != null)
+            get
             {
-                // Jika ketemu, ubah harganya
-                ikan.HargaPerKg = hargaBaru;
-                return true;
+                return $"Rp {this.HargaPerKg:N0}";
             }
-            // Jika tidak ketemu, kembalikan false
-            return false;
         }
     }
 }

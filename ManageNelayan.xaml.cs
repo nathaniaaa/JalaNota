@@ -2,6 +2,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
+using System.Threading.Tasks; 
+using System; 
 
 namespace JalaNota
 {
@@ -16,36 +18,72 @@ namespace JalaNota
             _adminLogin = adminDariLogin;
             DaftarNelayanView = new ObservableCollection<Nelayan>();
             dataGridNelayan.ItemsSource = DaftarNelayanView;
-            MuatDaftarNelayan();
+            this.Loaded += Window_Loaded_Async;
         }
 
-        private void MuatDaftarNelayan()
+        private async void Window_Loaded_Async(object sender, RoutedEventArgs e)
+        {
+            await MuatDaftarNelayan();
+        }
+
+        private async Task MuatDaftarNelayan()
         {
             DaftarNelayanView.Clear();
-            List<Nelayan> dataDariModel = Nelayan.LihatSemuaNelayan();
-            foreach (var nelayan in dataDariModel)
+            try
             {
-                DaftarNelayanView.Add(nelayan);
+                // ambil data dari Supabase
+                var response = await SupabaseClient.Instance.From<Nelayan>()
+                                    .Order("NamaNelayan", Postgrest.Constants.Ordering.Ascending)
+                                    .Get();
+
+                if (response.Models != null)
+                {
+                    foreach (var nelayan in response.Models)
+                    {
+                        DaftarNelayanView.Add(nelayan);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Gagal memuat daftar nelayan: {ex.Message}", "Error Koneksi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        // --- Tombol CRUD ---
-        private void btnInput_Click(object sender, RoutedEventArgs e)
+        // CRUD
+        private async void btnInput_Click(object sender, RoutedEventArgs e)
         {
-            // Validasi: ID Nelayan tidak perlu diisi karena dibuat otomatis di Nelayan.TambahNelayanBaru
+            // validasi
             if (string.IsNullOrWhiteSpace(txtNamaNelayan.Text) || string.IsNullOrWhiteSpace(txtUsername.Text) || string.IsNullOrWhiteSpace(txtPassword.Text))
             {
                 MessageBox.Show("Nama, Username, dan Password harus diisi!", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            Nelayan.TambahNelayanBaru(txtNamaNelayan.Text, txtUsername.Text, txtPassword.Text);
-            MuatDaftarNelayan();
-            ClearForm();
-            MessageBox.Show("Nelayan baru berhasil ditambahkan.", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+            // tambah nelayan
+            try
+            {
+                var nelayanBaru = new Nelayan
+                {
+                    NamaNelayan = txtNamaNelayan.Text,
+                    UsnNelayan = txtUsername.Text,
+                    PasswordNelayan = txtPassword.Text
+                };
+
+                await SupabaseClient.Instance.From<Nelayan>().Insert(nelayanBaru);
+
+                await MuatDaftarNelayan(); // muat ulang data
+                ClearForm();
+                MessageBox.Show("Nelayan baru berhasil ditambahkan.", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Gagal menambahkan nelayan: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        private void btnEdit_Click(object sender, RoutedEventArgs e)
+        // edit nelayan
+        private async void btnEdit_Click(object sender, RoutedEventArgs e)
         {
             if (dataGridNelayan.SelectedItem is Nelayan selected)
             {
@@ -55,16 +93,22 @@ namespace JalaNota
                     return;
                 }
 
-                bool sukses = Nelayan.UbahNelayan(selected.IDNelayan, txtNamaNelayan.Text, txtUsername.Text, txtPassword.Text);
-                if (sukses)
+                try
                 {
-                    MuatDaftarNelayan();
+                    await SupabaseClient.Instance.From<Nelayan>()
+                        .Where(n => n.IDNelayan == selected.IDNelayan)
+                        .Set(n => n.NamaNelayan, txtNamaNelayan.Text)
+                        .Set(n => n.UsnNelayan, txtUsername.Text)
+                        .Set(n => n.PasswordNelayan, txtPassword.Text)
+                        .Update();
+
+                    await MuatDaftarNelayan(); // muat ulang data
                     ClearForm();
                     MessageBox.Show("Data nelayan berhasil diubah.", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                else
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Gagal mengubah data. ID Nelayan tidak ditemukan.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Gagal mengubah data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             else
@@ -73,16 +117,27 @@ namespace JalaNota
             }
         }
 
-        private void btnDelete_Click(object sender, RoutedEventArgs e)
+        // delete nelayan
+        private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (dataGridNelayan.SelectedItem is Nelayan selected)
             {
                 MessageBoxResult result = MessageBox.Show($"Yakin ingin menghapus {selected.NamaNelayan}?", "Konfirmasi Hapus", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
-                    Nelayan.HapusNelayan(selected.IDNelayan);
-                    MuatDaftarNelayan();
-                    ClearForm();
+                    try
+                    {
+                        await SupabaseClient.Instance.From<Nelayan>()
+                            .Where(n => n.IDNelayan == selected.IDNelayan)
+                            .Delete();
+
+                        await MuatDaftarNelayan(); // muat ulang data
+                        ClearForm();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Gagal menghapus nelayan: {ex.Message}. (Pastikan nelayan tidak memiliki data setoran terkait)", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
             else
@@ -91,7 +146,6 @@ namespace JalaNota
             }
         }
 
-        // --- Interaksi UI Lainnya ---
         private void dataGridNelayan_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (dataGridNelayan.SelectedItem is Nelayan selected)
@@ -117,7 +171,7 @@ namespace JalaNota
             dataGridNelayan.UnselectAll();
         }
 
-        // --- Tombol Navbar ---
+        // navbar
         private void ManageSetoran_Click(object sender, RoutedEventArgs e)
         {
             ManageSetoran manageSetoranWindow = new ManageSetoran(_adminLogin);
@@ -125,9 +179,9 @@ namespace JalaNota
             this.Close();
         }
 
-        private void ManageNelayan_Click(object sender, RoutedEventArgs e) 
-        { 
-            // Tetap di halaman ini  
+        private void ManageNelayan_Click(object sender, RoutedEventArgs e)
+        {
+            // Tetap di halaman ini
         }
 
         private void ManageIkan_Click(object sender, RoutedEventArgs e)

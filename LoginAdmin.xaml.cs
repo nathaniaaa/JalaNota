@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Linq; 
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading.Tasks; 
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -14,9 +14,6 @@ using System.Windows.Shapes;
 
 namespace JalaNota
 {
-    /// <summary>
-    /// Interaction logic for LoginAdmin.xaml
-    /// </summary>
     public partial class LoginAdmin : Window
     {
         public LoginAdmin()
@@ -32,7 +29,6 @@ namespace JalaNota
         }
         private void PilihLoginBtnAdmin_Click(object sender, RoutedEventArgs e)
         {
-            // Tetap di halaman ini
         }
 
         private void tbPassword_PasswordChangedA(object sender, RoutedEventArgs e)
@@ -64,22 +60,39 @@ namespace JalaNota
             }
         }
 
-        private void LoginAdm_Click(object sender, RoutedEventArgs e)
+        private async void LoginAdm_Click(object sender, RoutedEventArgs e)
         {
             string username = tbUsernameA.Text;
             string password = tbPasswordA.Password;
-            Admin admin = new Admin();
-            bool loginSuccess = admin.Login(username, password);
-            if (loginSuccess)
+
+            try
             {
-                MessageBox.Show($"Selamat datang, {admin.NamaAdmin}!", "Login Berhasil", MessageBoxButton.OK, MessageBoxImage.Information);
-                ManageSetoran manageSetoranWindow = new ManageSetoran(admin);
-                manageSetoranWindow.Show();
-                this.Close();
+                // ambil data dari supabase
+                var response = await SupabaseClient.Instance.From<Admin>()
+                    .Where(a => a.UsernameAdmin == username && a.PasswordAdmin == password)
+                    .Get();
+
+                // ambil data admin pertama (jika ada)
+                var admin = response.Models.FirstOrDefault();
+
+                // cek apakah admin ditemukan
+                if (admin != null) // jika 'admin' tidak null, berarti login berhasil
+                {
+                    MessageBox.Show($"Selamat datang, {admin.NamaAdmin}!", "Login Berhasil", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // kirim objek 'admin' (yang sudah berisi data) ke halaman berikutnya
+                    ManageSetoran manageSetoranWindow = new ManageSetoran(admin);
+                    manageSetoranWindow.Show();
+                    this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Username atau password salah. Silakan coba lagi.", "Login Gagal", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Username atau password salah. Silakan coba lagi.", "Login Gagal", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Terjadi error koneksi: {ex.Message}", "Login Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
