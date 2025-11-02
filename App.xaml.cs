@@ -1,17 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
+using System.Configuration; 
 
 namespace JalaNota
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            string supabaseUrl = ConfigurationManager.AppSettings["SupabaseUrl"];
+            string supabaseKey = ConfigurationManager.AppSettings["SupabaseKey"];
+
+            // Validasi sederhana
+            if (string.IsNullOrEmpty(supabaseUrl) || string.IsNullOrEmpty(supabaseKey))
+            {
+                MessageBox.Show("Error: Supabase URL atau Key tidak ditemukan.");
+                Current.Shutdown();
+                return;
+            }
+
+            SupabaseClient.Initialize(supabaseUrl, supabaseKey);
+        }
     }
 }

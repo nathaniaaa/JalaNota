@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System;
+using System.Threading.Tasks;
 
 namespace JalaNota
 {
@@ -8,32 +10,37 @@ namespace JalaNota
     {
         public LihatHargaIkan_non_admin_()
         {
-            InitializeComponent();   
-            LoadDummyData();         
+            InitializeComponent();
+            LoadDataFromSupabase();
         }
 
-        private void LoadDummyData()
+        private async void LoadDataFromSupabase()
         {
-            var daftarIkan = new List<HargaIkan>
+            try
             {
-                new HargaIkan { NamaIkan = "Ikan Lele", Harga = "25.000" },
-                new HargaIkan { NamaIkan = "Ikan Nila", Harga = "28.000" },
-                new HargaIkan { NamaIkan = "Ikan Gurame", Harga = "45.000" },
-                new HargaIkan { NamaIkan = "Ikan Mujair", Harga = "30.000" },
-                new HargaIkan { NamaIkan = "Ikan Patin", Harga = "27.000" },
-                new HargaIkan { NamaIkan = "Ikan Tuna", Harga = "75.000" },
-                new HargaIkan { NamaIkan = "Ikan Bandeng", Harga = "33.000" },
-                new HargaIkan { NamaIkan = "Ikan Tongkol", Harga = "38.000" },
-                new HargaIkan { NamaIkan = "Ikan Kakap Merah", Harga = "60.000" },
-                new HargaIkan { NamaIkan = "Ikan Kembung", Harga = "32.000" }
-            };
+                var client = SupabaseClient.Instance;
 
-            dataGridIkan.ItemsSource = daftarIkan;
-        }
+                // query untuk ambil data dari tabel 'JenisIkan'
+                var response = await client.From<JenisIkan>()
+                                            .Select("*")
+                                            .Order("NamaIkan", Postgrest.Constants.Ordering.Ascending) // Urutkan A-Z
+                                            .Get();
 
-        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            
+                // memasukkan hasilnya ke DataGrid
+                if (response.Models != null)
+                {
+                    dataGridIkan.ItemsSource = response.Models;
+                }
+                else
+                {
+                    MessageBox.Show("Gagal mengambil data ikan dari database.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // pesan jika koneksi gagal atau ada error
+                MessageBox.Show($"Terjadi error saat memuat data: {ex.Message}", "Error Koneksi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Login_Click(object sender, RoutedEventArgs e)
@@ -47,11 +54,5 @@ namespace JalaNota
         {
 
         }
-    }
-
-    public class HargaIkan
-    {
-        public string NamaIkan { get; set; }
-        public string Harga { get; set; }
     }
 }

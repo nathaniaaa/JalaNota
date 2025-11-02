@@ -3,47 +3,60 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
+using System.Threading.Tasks; 
+using System; 
 
 namespace JalaNota
 {
-    // Menggunakan JenisIkan langsung sebagai Model View karena strukturnya cocok
     public partial class ManageDaftarIkan : Window
     {
-        // ObservableCollection untuk menampilkan dan merefresh DataGrid
         public ObservableCollection<JenisIkan> DaftarIkanView { get; set; }
-
-        // 1. Tambahkan field untuk menyimpan data admin
         private Admin _adminLogin;
 
-        // 2. Ubah constructor untuk menerima objek Admin
         public ManageDaftarIkan(Admin adminDariLogin)
         {
             InitializeComponent();
-
-            // Simpan data admin yang diterima
             _adminLogin = adminDariLogin;
 
             DaftarIkanView = new ObservableCollection<JenisIkan>();
-            MuatDaftarIkan();
             dataGridIkan.ItemsSource = DaftarIkanView;
+            this.Loaded += Window_Loaded_Async;
         }
 
-        private void MuatDaftarIkan()
+        private async void Window_Loaded_Async(object sender, RoutedEventArgs e)
+        {
+            await MuatDaftarIkan();
+        }
+
+        private async Task MuatDaftarIkan()
         {
             DaftarIkanView.Clear();
-            List<JenisIkan> dataDariModel = JenisIkan.LihatSemuaJenisIkan();
 
-            foreach (var ikan in dataDariModel)
+            try
             {
-                DaftarIkanView.Add(ikan);
+                // ambil data dari Supabase
+                var response = await SupabaseClient.Instance.From<JenisIkan>()
+                                                .Order("NamaIkan", Postgrest.Constants.Ordering.Ascending)
+                                                .Get();
+
+                if (response.Models != null)
+                {
+                    foreach (var ikan in response.Models)
+                    {
+                        DaftarIkanView.Add(ikan);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Gagal memuat daftar ikan: {ex.Message}", "Error Koneksi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         // --- CRUD Buttons ---
-
-        private void btnInput_Click(object sender, RoutedEventArgs e)
+        private async void btnInput_Click(object sender, RoutedEventArgs e)
         {
-            // Validasi: ID Ikan tidak perlu diisi karena dibuat otomatis di JenisIkan.TambahIkanBaru
+            // validasi 
             if (string.IsNullOrWhiteSpace(txtNamaIkan.Text) || string.IsNullOrWhiteSpace(txtHarga.Text))
             {
                 MessageBox.Show("Nama Ikan dan Harga harus diisi!", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -56,15 +69,31 @@ namespace JalaNota
                 return;
             }
 
-            // Memanggil metode statis dari JenisIkan.cs
-            JenisIkan.TambahIkanBaru(txtNamaIkan.Text, harga);
+            // tambah ikan baru
+            try
+            {
+                var ikanBaru = new JenisIkan
+                {
+                    NamaIkan = txtNamaIkan.Text,
+                    HargaPerKg = harga
+                };
 
-            // Muat ulang data untuk merefresh DataGrid
-            MuatDaftarIkan();
-            ClearForm();
+                // kirim data baru ke Supabase
+                await SupabaseClient.Instance.From<JenisIkan>().Insert(ikanBaru);
+
+                // muat ulang data untuk merefresh DataGrid
+                await MuatDaftarIkan();
+                ClearForm();
+                MessageBox.Show("Ikan baru berhasil ditambahkan.", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Gagal menambahkan ikan: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        private void btnEdit_Click(object sender, RoutedEventArgs e)
+        
+        private async void btnEdit_Click(object sender, RoutedEventArgs e)
         {
             if (dataGridIkan.SelectedItem is JenisIkan selected)
             {
@@ -74,31 +103,30 @@ namespace JalaNota
                     return;
                 }
 
-                // Cek apakah ada perubahan
+                // cek apakah ada perubahan
                 if (selected.NamaIkan == txtNamaIkan.Text && selected.HargaPerKg == hargaBaru)
                 {
                     MessageBox.Show("Tidak ada perubahan data yang dilakukan.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
 
-                // Hanya HargaPerKg yang bisa diubah via method statis yang ada di JenisIkan.cs
-                bool success = JenisIkan.UbahHargaIkan(selected.IDIkan, hargaBaru);
-
-                if (success)
+                // ubah tabel ikan
+                try
                 {
-                    if (selected.NamaIkan != txtNamaIkan.Text)
-                    {
-                        MessageBox.Show("Nama Ikan tidak dapat diubah karena model JenisIkan.cs tidak menyediakan method untuk itu.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
+                    await SupabaseClient.Instance.From<JenisIkan>()
+                          .Where(i => i.IDIkan == selected.IDIkan)
+                          .Set(i => i.NamaIkan, txtNamaIkan.Text)
+                          .Set(i => i.HargaPerKg, hargaBaru)
+                          .Update();
 
-                    // Muat ulang data untuk memastikan perubahan tercermin
-                    MuatDaftarIkan();
-                    MessageBox.Show("Harga ikan berhasil diperbarui.", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // muat ulang data
+                    await MuatDaftarIkan();
                     ClearForm();
+                    MessageBox.Show("Data ikan berhasil diperbarui.", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                else
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Gagal menemukan ID Ikan untuk diubah.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Gagal mengedit ikan: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             else
@@ -107,18 +135,31 @@ namespace JalaNota
             }
         }
 
-        private void btnDelete_Click(object sender, RoutedEventArgs e)
+        // delete
+        private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (dataGridIkan.SelectedItem is JenisIkan selected)
             {
-                MessageBoxResult result = MessageBox.Show($"Yakin ingin menghapus {selected.NamaIkan}? (Aksi ini tidak didukung oleh model JenisIkan.cs)",
+                MessageBoxResult result = MessageBox.Show($"Yakin ingin menghapus {selected.NamaIkan}?",
                     "Konfirmasi Hapus", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    // TODO: Perlu menambahkan metode statis HapusIkan(int IDIkan) di JenisIkan.cs
-                    MessageBox.Show("Penghapusan gagal karena model JenisIkan.cs tidak menyediakan method untuk menghapus data statis.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    ClearForm();
+                    try
+                    {
+                        await SupabaseClient.Instance.From<JenisIkan>()
+                                    .Where(i => i.IDIkan == selected.IDIkan)
+                                    .Delete();
+
+                        // muat ulang data
+                        await MuatDaftarIkan();
+                        ClearForm();
+                        MessageBox.Show("Data ikan berhasil dihapus.", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Gagal menghapus ikan: {ex.Message}. (Pastikan ikan tidak dipakai di data setoran)", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
             else
@@ -127,11 +168,11 @@ namespace JalaNota
             }
         }
 
+
         private void dataGridIkan_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (dataGridIkan.SelectedItem is JenisIkan selected)
             {
-                // IDIkan dan HargaPerKg adalah properti di JenisIkan.cs
                 txtIDIkan.Text = selected.IDIkan.ToString();
                 txtNamaIkan.Text = selected.NamaIkan;
                 txtHarga.Text = selected.HargaPerKg.ToString();
@@ -151,11 +192,10 @@ namespace JalaNota
             dataGridIkan.UnselectAll();
         }
 
-        // --- Navbar Clicks ---
+        // navbar
 
         private void ManageSetoran_Click(object sender, RoutedEventArgs e)
         {
-            // 3. Gunakan data admin yang sudah disimpan saat pindah halaman
             ManageSetoran manageSetoranWindow = new ManageSetoran(_adminLogin);
             manageSetoranWindow.Show();
             this.Close();

@@ -75,7 +75,7 @@
                                         Binding="{Binding NamaIkan}"
                                         Width="*"/>
                     <DataGridTextColumn Header="Harga (Rp/kg)"
-                                        Binding="{Binding Harga}"
+                                        Binding="{Binding HargaFormatted}"
                                         Width="150"
                                         ElementStyle="{StaticResource RightAlignStyle}"/>
                 </DataGrid.Columns>
