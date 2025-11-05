@@ -1,13 +1,14 @@
 ﻿using Postgrest.Attributes;
 using Postgrest.Models;
 using System;
+using Newtonsoft.Json;
 
 namespace JalaNota
 {
     [Table("Setoran")]
     public class Setoran : BaseModel
     {
-        [PrimaryKey("IDSetoran")]
+        [PrimaryKey("IDSetoran", false)]  
         public int IDSetoran { get; set; }
 
         [Column("IDNelayan")]

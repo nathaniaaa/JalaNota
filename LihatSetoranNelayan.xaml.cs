@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-// Tambahkan using ini
 using System.Threading.Tasks;
 
 namespace JalaNota
@@ -77,7 +76,8 @@ namespace JalaNota
                     DaftarSetoranView.Add(new SetoranNelayanView
                     {
                         IDSetoran = s.IDSetoran,
-                        Tanggal = s.WaktuSetor.ToShortDateString(),
+                        Tanggal = s.WaktuSetor.ToString("dd/MM/yyyy"),
+                        WaktuSaja = s.WaktuSetor.ToString("HH:mm"),
                         NamaIkan = namaIkan ?? "Ikan Dihapus", // jika ikan tidak ada di kamus
                         Berat = s.BeratKg,
                         Total = s.HargaTotal
@@ -96,8 +96,16 @@ namespace JalaNota
     {
         public int IDSetoran { get; set; }
         public string Tanggal { get; set; }
+        public string WaktuSaja { get; set; }
         public string NamaIkan { get; set; }
         public double Berat { get; set; }
         public double Total { get; set; }
+        public string HargaFormattedTotal
+        {
+            get
+            {
+                return $"Rp {this.Total:N0}";
+            }
+        }
     }
 }

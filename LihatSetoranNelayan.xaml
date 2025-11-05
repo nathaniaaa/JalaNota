@@ -77,10 +77,11 @@
                   Height="350">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID Setoran" Binding="{Binding IDSetoran}" Width="100"/>
-                    <DataGridTextColumn Header="Tanggal" Binding="{Binding WaktuSetor}" Width="100"/>
+                    <DataGridTextColumn Header="Tanggal" Binding="{Binding Tanggal}" Width="100"/>
+                    <DataGridTextColumn Header="Waktu" Binding="{Binding WaktuSaja}" Width="70"/>
                     <DataGridTextColumn Header="Nama Ikan" Binding="{Binding NamaIkan}" Width="*"/>
-                    <DataGridTextColumn Header="Berat (kg)" Binding="{Binding BeratKg}" Width="120"/>
-                    <DataGridTextColumn Header="Total Harga" Binding="{Binding HargaTotal}" Width="150"/>
+                    <DataGridTextColumn Header="Berat (kg)" Binding="{Binding Berat, StringFormat={}{0:N2}}" Width="120"/>
+                    <DataGridTextColumn Header="Total Harga" Binding="{Binding HargaFormattedTotal}" Width="150" ElementStyle="{StaticResource RightAlignStyle}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </StackPanel>
