@@ -28,6 +28,9 @@ namespace JalaNota
         {
             await InisialisasiDataHalaman();
             dpTanggalSetoran.SelectedDate = DateTime.Now.Date;
+            // Set waktu sekarang
+            txtJam.Text = DateTime.Now.Hour.ToString("00");
+            txtMenit.Text = DateTime.Now.Minute.ToString("00");
         }
         private async Task InisialisasiDataHalaman()
         {
@@ -70,8 +73,9 @@ namespace JalaNota
                     DaftarSetoranView.Add(new SetoranView
                     {
                         IDSetoran = s.IDSetoran,
-                        Tanggal = s.WaktuSetor.ToShortDateString(),
-                        WaktuSetor = s.WaktuSetor, 
+                        TanggalSaja = s.WaktuSetor.ToString("dd/MM/yyyy"),
+                        WaktuSaja = s.WaktuSetor.ToString("HH:mm"),
+                        WaktuSetor = s.WaktuSetor,
                         IDNelayan = s.IDNelayan,
                         IDIkan = s.IDIkan,
                         NamaNelayan = namaNelayan ?? $"ID {s.IDNelayan}",
@@ -92,9 +96,18 @@ namespace JalaNota
         {
             // validasi
             if (cmbNamaNelayan.SelectedValue == null || cmbNamaIkan.SelectedValue == null ||
-                !dpTanggalSetoran.SelectedDate.HasValue || string.IsNullOrWhiteSpace(txtBerat.Text))
+                !dpTanggalSetoran.SelectedDate.HasValue || string.IsNullOrWhiteSpace(txtBerat.Text) ||
+                string.IsNullOrWhiteSpace(txtJam.Text) || string.IsNullOrWhiteSpace(txtMenit.Text))
             {
                 MessageBox.Show("Semua kolom harus diisi dengan benar.", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validasi jam dan menit
+            if (!int.TryParse(txtJam.Text, out int jam) || jam < 0 || jam > 23 ||
+                !int.TryParse(txtMenit.Text, out int menit) || menit < 0 || menit > 59)
+            {
+                MessageBox.Show("Format waktu tidak valid. Jam (0-23) dan Menit (0-59).", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -120,14 +133,27 @@ namespace JalaNota
 
                 double totalHarga = berat * ikan.HargaPerKg; // hitung total
 
+                // Gabungkan tanggal dengan jam dan menit
+                var waktuSetor = tanggalSetoran
+                    .AddHours(jam)
+                    .AddMinutes(menit);
+
+                // Validasi admin login
+                if (_adminLogin == null || _adminLogin.IDAdmin <= 0)
+                {
+                    MessageBox.Show("Error: Data admin tidak valid. Silakan login ulang.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
                 var setoranBaru = new Setoran
                 {
                     IDNelayan = idNelayan,
                     IDIkan = idIkan,
-                    IDAdmin = _adminLogin.IDAdmin, // ambil dari admin yg login
-                    WaktuSetor = tanggalSetoran,
+                    IDAdmin = _adminLogin.IDAdmin,
+                    WaktuSetor = waktuSetor,
                     BeratKg = berat,
                     HargaTotal = totalHarga
+                    // IDSetoran akan di-generate otomatis oleh database
                 };
 
                 await SupabaseClient.Instance.From<Setoran>().Insert(setoranBaru);
@@ -152,9 +178,19 @@ namespace JalaNota
                 return;
             }
 
-            if (cmbNamaNelayan.SelectedValue == null || cmbNamaIkan.SelectedValue == null || !dpTanggalSetoran.SelectedDate.HasValue || string.IsNullOrWhiteSpace(txtBerat.Text))
+            if (cmbNamaNelayan.SelectedValue == null || cmbNamaIkan.SelectedValue == null || 
+                !dpTanggalSetoran.SelectedDate.HasValue || string.IsNullOrWhiteSpace(txtBerat.Text) ||
+                string.IsNullOrWhiteSpace(txtJam.Text) || string.IsNullOrWhiteSpace(txtMenit.Text))
             {
                 MessageBox.Show("Semua kolom harus diisi dengan benar.", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validasi jam dan menit
+            if (!int.TryParse(txtJam.Text, out int jam) || jam < 0 || jam > 23 ||
+                !int.TryParse(txtMenit.Text, out int menit) || menit < 0 || menit > 59)
+            {
+                MessageBox.Show("Format waktu tidak valid. Jam (0-23) dan Menit (0-59).", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -233,7 +269,9 @@ namespace JalaNota
             {
                 txtIDSetoran.Text = selected.IDSetoran.ToString();
                 txtBerat.Text = selected.Berat.ToString();
-                dpTanggalSetoran.SelectedDate = selected.WaktuSetor; // gunakan data DateTime asli
+                dpTanggalSetoran.SelectedDate = selected.WaktuSetor.Date;
+                txtJam.Text = selected.WaktuSetor.Hour.ToString("00");
+                txtMenit.Text = selected.WaktuSetor.Minute.ToString("00");
                 cmbNamaNelayan.SelectedValue = selected.IDNelayan;
                 cmbNamaIkan.SelectedValue = selected.IDIkan;
             }
@@ -248,6 +286,9 @@ namespace JalaNota
         {
             txtIDSetoran.Clear();
             txtBerat.Clear();
+            // Set waktu sekarang saat membersihkan form
+            txtJam.Text = DateTime.Now.Hour.ToString("00");
+            txtMenit.Text = DateTime.Now.Minute.ToString("00");
             dpTanggalSetoran.SelectedDate = DateTime.Now.Date;
             cmbNamaNelayan.SelectedIndex = -1;
             cmbNamaIkan.SelectedIndex = -1;
@@ -280,13 +321,21 @@ namespace JalaNota
     public class SetoranView
     {
         public int IDSetoran { get; set; }
-        public string Tanggal { get; set; }
-        public DateTime WaktuSetor { get; set; }
+        public string TanggalSaja { get; set; }    // Untuk menampilkan tanggal
+        public string WaktuSaja { get; set; }      // Untuk menampilkan waktu
+        public DateTime WaktuSetor { get; set; }   // Tetap menyimpan DateTime lengkap
         public int IDNelayan { get; set; }
         public int IDIkan { get; set; }
         public string NamaNelayan { get; set; }
         public string NamaIkan { get; set; }
         public double Berat { get; set; }
         public double Total { get; set; }
+        public string HargaFormattedTotal 
+        { 
+            get 
+            {
+                return $"Rp {this.Total:N0}";
+            }
+        }
     }
 }
