@@ -65,8 +65,8 @@
     <Reference Include="Supabase.Functions, Version=1.3.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\functions-csharp.1.3.2\lib\netstandard2.0\Supabase.Functions.dll</HintPath>
     </Reference>
-    <Reference Include="Supabase.Gotrue, Version=4.2.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\gotrue-csharp.4.2.6\lib\netstandard2.0\Supabase.Gotrue.dll</HintPath>
+    <Reference Include="Supabase.Gotrue, Version=4.2.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\gotrue-csharp.4.2.7\lib\netstandard2.0\Supabase.Gotrue.dll</HintPath>
     </Reference>
     <Reference Include="Supabase.Postgrest, Version=3.5.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\postgrest-csharp.3.5.1\lib\netstandard2.0\Supabase.Postgrest.dll</HintPath>

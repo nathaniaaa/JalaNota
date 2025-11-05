@@ -1,9 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Collections.Generic;
-using System.Threading.Tasks; 
-using System; 
+using System;
+using System.Threading.Tasks;
 
 namespace JalaNota
 {
@@ -18,133 +17,235 @@ namespace JalaNota
             _adminLogin = adminDariLogin;
             DaftarNelayanView = new ObservableCollection<Nelayan>();
             dataGridNelayan.ItemsSource = DaftarNelayanView;
-            this.Loaded += Window_Loaded_Async;
+
+            // Load data saat window dibuka - using async pattern
+            Loaded += async (s, e) => await LoadDataFromSupabase();
         }
 
-        private async void Window_Loaded_Async(object sender, RoutedEventArgs e)
+        // LoadDataFromSupabase method - returns Task for awaitable calls
+        private async Task LoadDataFromSupabase()
         {
-            await MuatDaftarNelayan();
-        }
-
-        private async Task MuatDaftarNelayan()
-        {
-            DaftarNelayanView.Clear();
             try
             {
-                // ambil data dari Supabase
-                var response = await SupabaseClient.Instance.From<Nelayan>()
-                                    .Order("NamaNelayan", Postgrest.Constants.Ordering.Ascending)
-                                    .Get();
+                // Tampilkan loading indicator 
+                this.Cursor = System.Windows.Input.Cursors.Wait;
 
-                if (response.Models != null)
+                // Encapsulation Method: Nelayan.LihatSemuaNelayan()
+                var daftarNelayan = await Nelayan.LihatSemuaNelayan();
+
+                // Update UI
+                DaftarNelayanView.Clear();
+                foreach (var nelayan in daftarNelayan)
                 {
-                    foreach (var nelayan in response.Models)
-                    {
-                        DaftarNelayanView.Add(nelayan);
-                    }
+                    DaftarNelayanView.Add(nelayan);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Gagal memuat daftar nelayan: {ex.Message}", "Error Koneksi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Gagal memuat data nelayan: {ex.Message}", 
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                this.Cursor = System.Windows.Input.Cursors.Arrow;
             }
         }
 
-        // CRUD
+        // --- CRUD Operations menggunakan Encapsulation ---
+
+        // Tambah nelayan baru
         private async void btnInput_Click(object sender, RoutedEventArgs e)
         {
-            // validasi
-            if (string.IsNullOrWhiteSpace(txtNamaNelayan.Text) || string.IsNullOrWhiteSpace(txtUsername.Text) || string.IsNullOrWhiteSpace(txtPassword.Text))
+            // Validasi: ID harus kosong untuk input baru
+            if (!string.IsNullOrWhiteSpace(txtIDNelayan.Text))
             {
-                MessageBox.Show("Nama, Username, dan Password harus diisi!", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Untuk menambah nelayan baru, pastikan form kosong. Klik CLOSE terlebih dahulu.",
+                    "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            // tambah nelayan
+            // Validasi UI
+            if (string.IsNullOrWhiteSpace(txtNamaNelayan.Text) || 
+                string.IsNullOrWhiteSpace(txtUsername.Text) || 
+                string.IsNullOrWhiteSpace(txtPassword.Text))
+            {
+                MessageBox.Show("Nama, Username, dan Password harus diisi!", 
+                    "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (txtPassword.Text.Length < 6)
+            {
+                MessageBox.Show("Password harus minimal 6 karakter!", 
+                    "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             try
             {
-                var nelayanBaru = new Nelayan
+                this.Cursor = System.Windows.Input.Cursors.Wait;
+
+                // Encapsulation Method: Panggil method yang sudah ada validasinya
+                bool sukses = await Nelayan.TambahNelayanBaru(
+                    txtNamaNelayan.Text.Trim(), 
+                    txtUsername.Text.Trim(), 
+                    txtPassword.Text
+                );
+
+                if (sukses)
                 {
-                    NamaNelayan = txtNamaNelayan.Text,
-                    UsnNelayan = txtUsername.Text,
-                    PasswordNelayan = txtPassword.Text
-                };
-
-                await SupabaseClient.Instance.From<Nelayan>().Insert(nelayanBaru);
-
-                await MuatDaftarNelayan(); // muat ulang data
-                ClearForm();
-                MessageBox.Show("Nelayan baru berhasil ditambahkan.", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Nelayan baru berhasil ditambahkan.", 
+                        "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+                    
+                    // Reload data dari database
+                    await LoadDataFromSupabase();
+                    ClearForm();
+                }
+                else
+                {
+                    MessageBox.Show("Gagal menambahkan nelayan. Username mungkin sudah digunakan.", 
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Gagal menambahkan nelayan: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error: {ex.Message}", 
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                this.Cursor = System.Windows.Input.Cursors.Arrow;
             }
         }
 
-        // edit nelayan
+        // Edit nelayan
         private async void btnEdit_Click(object sender, RoutedEventArgs e)
         {
-            if (dataGridNelayan.SelectedItem is Nelayan selected)
+            // Ambil ID dari TextBox bukan dari selected item
+            if (string.IsNullOrWhiteSpace(txtIDNelayan.Text) || !int.TryParse(txtIDNelayan.Text, out int nelayanId))
             {
-                if (string.IsNullOrWhiteSpace(txtNamaNelayan.Text) || string.IsNullOrWhiteSpace(txtUsername.Text) || string.IsNullOrWhiteSpace(txtPassword.Text))
-                {
-                    MessageBox.Show("Nama, Username, dan Password tidak boleh kosong!", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                MessageBox.Show("Pilih data nelayan yang ingin diedit dari tabel terlebih dahulu.",
+                    "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
+            // Validasi UI
+            if (string.IsNullOrWhiteSpace(txtNamaNelayan.Text) ||
+                string.IsNullOrWhiteSpace(txtUsername.Text) ||
+                string.IsNullOrWhiteSpace(txtPassword.Text))
+            {
+                MessageBox.Show("Nama, Username, dan Password tidak boleh kosong!",
+                    "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (txtPassword.Text.Length < 6)
+            {
+                MessageBox.Show("Password harus minimal 6 karakter!",
+                    "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                this.Cursor = System.Windows.Input.Cursors.Wait;
+
+                // Debug: Tampilkan ID yang akan diupdate
+                System.Diagnostics.Debug.WriteLine($"Attempting to update Nelayan ID: {nelayanId}");
+                System.Diagnostics.Debug.WriteLine($"New Username: {txtUsername.Text.Trim()}");
+
+                // Encapsulation Method: Panggil method untuk update data dengan ID dari textbox
+                bool sukses = await Nelayan.UbahNelayan(
+                    nelayanId,  
+                    txtNamaNelayan.Text.Trim(),
+                    txtUsername.Text.Trim(),
+                    txtPassword.Text
+                );
+
+                if (sukses)
+                {
+                    MessageBox.Show("Data nelayan berhasil diubah.",
+                        "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // Reload data dari database
+                    await LoadDataFromSupabase();
+                    ClearForm();
+                }
+                else
+                {
+                    MessageBox.Show("Gagal mengubah data. Username mungkin sudah digunakan oleh nelayan lain.",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                this.Cursor = System.Windows.Input.Cursors.Arrow;
+            }
+        }
+
+        // Hapus nelayan
+        private async void btnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            // Ambil ID dari TextBox
+            if (string.IsNullOrWhiteSpace(txtIDNelayan.Text) || !int.TryParse(txtIDNelayan.Text, out int nelayanId))
+            {
+                MessageBox.Show("Pilih data nelayan yang ingin dihapus dari tabel.",
+                    "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // Dapatkan nama untuk konfirmasi
+            string namaNelayan = txtNamaNelayan.Text;
+
+            MessageBoxResult result = MessageBox.Show(
+                $"Yakin ingin menghapus {namaNelayan}?",
+                "Konfirmasi Hapus",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question
+            );
+
+            if (result == MessageBoxResult.Yes)
+            {
                 try
                 {
-                    await SupabaseClient.Instance.From<Nelayan>()
-                        .Where(n => n.IDNelayan == selected.IDNelayan)
-                        .Set(n => n.NamaNelayan, txtNamaNelayan.Text)
-                        .Set(n => n.UsnNelayan, txtUsername.Text)
-                        .Set(n => n.PasswordNelayan, txtPassword.Text)
-                        .Update();
+                    this.Cursor = System.Windows.Input.Cursors.Wait;
 
-                    await MuatDaftarNelayan(); // muat ulang data
-                    ClearForm();
-                    MessageBox.Show("Data nelayan berhasil diubah.", "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Encapsulation Method: Panggil method untuk delete dengan ID dari textbox
+                    bool sukses = await Nelayan.HapusNelayan(nelayanId);
+
+                    if (sukses)
+                    {
+                        MessageBox.Show("Nelayan berhasil dihapus.",
+                            "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        // Reload data dari database
+                        await LoadDataFromSupabase();
+                        ClearForm();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Gagal menghapus nelayan.",
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Gagal mengubah data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Error: {ex.Message}",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-            }
-            else
-            {
-                MessageBox.Show("Pilih data nelayan yang ingin diedit dari tabel.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
-
-        // delete nelayan
-        private async void btnDelete_Click(object sender, RoutedEventArgs e)
-        {
-            if (dataGridNelayan.SelectedItem is Nelayan selected)
-            {
-                MessageBoxResult result = MessageBox.Show($"Yakin ingin menghapus {selected.NamaNelayan}?", "Konfirmasi Hapus", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
+                finally
                 {
-                    try
-                    {
-                        await SupabaseClient.Instance.From<Nelayan>()
-                            .Where(n => n.IDNelayan == selected.IDNelayan)
-                            .Delete();
-
-                        await MuatDaftarNelayan(); // muat ulang data
-                        ClearForm();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Gagal menghapus nelayan: {ex.Message}. (Pastikan nelayan tidak memiliki data setoran terkait)", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
+                    this.Cursor = System.Windows.Input.Cursors.Arrow;
                 }
             }
-            else
-            {
-                MessageBox.Show("Pilih data nelayan yang ingin dihapus dari tabel.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
         }
+
+        // --- UI Helper Methods ---
 
         private void dataGridNelayan_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -171,7 +272,7 @@ namespace JalaNota
             dataGridNelayan.UnselectAll();
         }
 
-        // navbar
+        // --- Navigation Methods ---
         private void ManageSetoran_Click(object sender, RoutedEventArgs e)
         {
             ManageSetoran manageSetoranWindow = new ManageSetoran(_adminLogin);
@@ -179,9 +280,9 @@ namespace JalaNota
             this.Close();
         }
 
-        private void ManageNelayan_Click(object sender, RoutedEventArgs e)
-        {
-            // Tetap di halaman ini
+        private void ManageNelayan_Click(object sender, RoutedEventArgs e) 
+        { 
+            // Tetap di halaman ini  
         }
 
         private void ManageIkan_Click(object sender, RoutedEventArgs e)

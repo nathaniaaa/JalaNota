@@ -22,5 +22,33 @@ namespace JalaNota
 
         [Column("PasswordAdmin")]
         public string PasswordAdmin { get; set; }
+
+        public static async Task<Admin> Login(string username, string password)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+                    return null;
+
+                var client = SupabaseClient.Instance;
+
+                // Add debugging
+                System.Diagnostics.Debug.WriteLine($"Attempting login for: {username}");
+
+                var response = await client.From<Admin>()
+                    .Where(a => a.UsernameAdmin == username && a.PasswordAdmin == password)
+                    .Get();
+
+                System.Diagnostics.Debug.WriteLine($"Response count: {response.Models?.Count ?? 0}");
+
+                return response.Models?.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                return null;
+            }
+        }
     }
 }
