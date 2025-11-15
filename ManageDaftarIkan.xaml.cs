@@ -36,7 +36,7 @@ namespace JalaNota
             {
                 // ambil data dari Supabase
                 var response = await SupabaseClient.Instance.From<JenisIkan>()
-                                                .Order("NamaIkan", Postgrest.Constants.Ordering.Ascending)
+                                                .Order("IDIkan", Postgrest.Constants.Ordering.Ascending)
                                                 .Get();
 
                 if (response.Models != null)
