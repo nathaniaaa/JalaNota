@@ -3,8 +3,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
-using System.Threading.Tasks; 
-using System; 
+using System.Threading.Tasks;
+using System;
 
 namespace JalaNota
 {
@@ -36,7 +36,7 @@ namespace JalaNota
             {
                 // ambil data dari Supabase
                 var response = await SupabaseClient.Instance.From<JenisIkan>()
-                                                .Order("NamaIkan", Postgrest.Constants.Ordering.Ascending)
+                                                .Order("IDIkan", Postgrest.Constants.Ordering.Ascending)
                                                 .Get();
 
                 if (response.Models != null)
@@ -56,16 +56,34 @@ namespace JalaNota
         // --- CRUD Buttons ---
         private async void btnInput_Click(object sender, RoutedEventArgs e)
         {
-            // validasi 
+            // Validasi: Cek apakah form sedang dipakai edit
+            if (!string.IsNullOrWhiteSpace(txtIDIkan.Text))
+            {
+                MessageBox.Show("Form sedang terisi data. \nUntuk menambah data baru, silakan klik 'CLOSE' terlebih dahulu.",
+                                "Aksi Ditolak", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validasi: Cek field kosong
             if (string.IsNullOrWhiteSpace(txtNamaIkan.Text) || string.IsNullOrWhiteSpace(txtHarga.Text))
             {
                 MessageBox.Show("Nama Ikan dan Harga harus diisi!", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
+            // Validasi: Cek harga adalah angka
             if (!double.TryParse(txtHarga.Text, out double harga))
             {
                 MessageBox.Show("Harga harus berupa angka!", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validasi: Duplikat nama ikan
+            string namaBaruNormalized = txtNamaIkan.Text.Trim().ToLower();
+            if (DaftarIkanView.Any(ikan => ikan.NamaIkan.Trim().ToLower() == namaBaruNormalized))
+            {
+                MessageBox.Show("Nama ikan tersebut sudah ada di daftar. \nSilakan isi data ikan lain.",
+                                "Input Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -74,7 +92,8 @@ namespace JalaNota
             {
                 var ikanBaru = new JenisIkan
                 {
-                    NamaIkan = txtNamaIkan.Text,
+                    // Gunakan .Trim() untuk membersihkan spasi
+                    NamaIkan = txtNamaIkan.Text.Trim(),
                     HargaPerKg = harga
                 };
 
@@ -92,19 +111,38 @@ namespace JalaNota
             }
         }
 
-        
+
         private async void btnEdit_Click(object sender, RoutedEventArgs e)
         {
             if (dataGridIkan.SelectedItem is JenisIkan selected)
             {
+                // Validasi: Cek harga adalah angka
                 if (!double.TryParse(txtHarga.Text, out double hargaBaru))
                 {
                     MessageBox.Show("Harga harus berupa angka!", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // cek apakah ada perubahan
-                if (selected.NamaIkan == txtNamaIkan.Text && selected.HargaPerKg == hargaBaru)
+                // Validasi: Cek field kosong (ditambahkan agar konsisten)
+                if (string.IsNullOrWhiteSpace(txtNamaIkan.Text))
+                {
+                    MessageBox.Show("Nama Ikan tidak boleh kosong!", "Validasi Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // validasi duplikat nama ikan
+                string namaEditNormalized = txtNamaIkan.Text.Trim().ToLower();
+                if (DaftarIkanView.Any(ikan =>
+                        ikan.NamaIkan.Trim().ToLower() == namaEditNormalized && // namanya sama
+                        ikan.IDIkan != selected.IDIkan)) // tapi ID nya beda
+                {
+                    MessageBox.Show("Nama ikan tersebut sudah digunakan. \nSilakan gunakan nama yang unik.",
+                                    "Edit Gagal", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // cek apakah ada perubahan (pakai .Trim())
+                if (selected.NamaIkan == txtNamaIkan.Text.Trim() && selected.HargaPerKg == hargaBaru)
                 {
                     MessageBox.Show("Tidak ada perubahan data yang dilakukan.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
@@ -115,7 +153,8 @@ namespace JalaNota
                 {
                     await SupabaseClient.Instance.From<JenisIkan>()
                           .Where(i => i.IDIkan == selected.IDIkan)
-                          .Set(i => i.NamaIkan, txtNamaIkan.Text)
+                          // Gunakan .Trim() untuk membersihkan spasi
+                          .Set(i => i.NamaIkan, txtNamaIkan.Text.Trim())
                           .Set(i => i.HargaPerKg, hargaBaru)
                           .Update();
 
