@@ -170,7 +170,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Text="ID Ikan:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0,5"/>
-                        <TextBox x:Name="txtIDIkan" Grid.Row="0" Grid.Column="1" Margin="0,5" Height="28"/>
+                        <TextBox x:Name="txtIDIkan" Grid.Row="0" Grid.Column="1" Margin="0,5" Height="28" IsReadOnly="True" Background="#EEEEEE"/>
 
                         <TextBlock Text="Nama Ikan:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="0,5"/>
                         <TextBox x:Name="txtNamaIkan" Grid.Row="1" Grid.Column="1" Margin="0,5" Height="28"/>

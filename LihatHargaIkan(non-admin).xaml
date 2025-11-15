@@ -62,6 +62,7 @@
                       AutoGenerateColumns="False"
                       FontSize="14"
                       HeadersVisibility="Column"
+                      IsReadOnly="True"
                       RowHeaderWidth="0"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
