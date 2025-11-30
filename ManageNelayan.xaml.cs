@@ -56,15 +56,7 @@ namespace JalaNota
         // Tambah nelayan baru
         private async void btnInput_Click(object sender, RoutedEventArgs e)
         {
-            // Validasi: ID harus kosong untuk input baru
-            if (!string.IsNullOrWhiteSpace(txtIDNelayan.Text))
-            {
-                MessageBox.Show("Untuk menambah nelayan baru, pastikan form kosong. Klik CLOSE terlebih dahulu.",
-                    "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            // Validasi UI
+            // Validasi UI - ID tidak perlu dicek karena auto-generate
             if (string.IsNullOrWhiteSpace(txtNamaNelayan.Text) || 
                 string.IsNullOrWhiteSpace(txtUsername.Text) || 
                 string.IsNullOrWhiteSpace(txtPassword.Text))

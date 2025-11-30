@@ -183,7 +183,7 @@
                             </Grid.RowDefinitions>
 
                             <TextBlock Text="ID Setoran:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0,5"/>
-                            <TextBox x:Name="txtIDSetoran" Grid.Row="0" Grid.Column="1" Margin="0,5" Height="28"/>
+                            <TextBox x:Name="txtIDSetoran" Grid.Row="0" Grid.Column="1" Margin="0,5" Height="28" IsReadOnly="True" IsEnabled="False" Background="#E0E0E0"/>
 
                             <TextBlock Text="Tanggal:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="0,5"/>
                             <DatePicker x:Name="dpTanggalSetoran" Grid.Row="1" Grid.Column="1" Margin="0,5" Height="28" DisplayDate="2025-01-01"  SelectedDate="{x:Static System:DateTime.Now}" xmlns:System="clr-namespace:System;assembly=mscorlib"/>
