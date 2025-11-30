@@ -30,6 +30,9 @@ namespace JalaNota
                 if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
                     return null;
 
+                // Hapus semua spasi dari username
+                username = username.Replace(" ", "");
+
                 var client = SupabaseClient.Instance;
 
                 // Add debugging
