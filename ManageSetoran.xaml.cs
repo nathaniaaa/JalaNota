@@ -211,11 +211,16 @@ namespace JalaNota
 
                 double totalHarga = berat * ikan.HargaPerKg; // Hitung ulang total
 
+                // FIX: Gabungkan tanggal dengan jam dan menit (sama seperti di btnInput_Click)
+                var waktuSetor = tanggalSetoran
+                    .AddHours(jam)
+                    .AddMinutes(menit);
+
                 await SupabaseClient.Instance.From<Setoran>()
                     .Where(s => s.IDSetoran == idSetoran)
                     .Set(s => s.IDNelayan, idNelayan)
                     .Set(s => s.IDIkan, idIkan)
-                    .Set(s => s.WaktuSetor, tanggalSetoran)
+                    .Set(s => s.WaktuSetor, waktuSetor)  // FIX: Gunakan waktuSetor yang sudah include jam & menit
                     .Set(s => s.BeratKg, berat)
                     .Set(s => s.HargaTotal, totalHarga)
                     .Set(s => s.IDAdmin, _adminLogin.IDAdmin) // Catat siapa yg edit
