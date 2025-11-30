@@ -94,6 +94,7 @@ namespace JalaNota
     // Kelas Model (View Model) untuk DataGrid di sisi Nelayan
     public class SetoranNelayanView
     {
+        public DateTime WaktuSetor { get; set; }
         public int IDSetoran { get; set; }
         public string Tanggal { get; set; }
         public string WaktuSaja { get; set; }
