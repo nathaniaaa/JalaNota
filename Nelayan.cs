@@ -54,6 +54,9 @@ namespace JalaNota
                 if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
                     return null;
 
+                // Hapus semua spasi dari username
+                username = username.Replace(" ", "");
+
                 var client = SupabaseClient.Instance;
 
                 // Query ke database dengan filter
@@ -125,6 +128,9 @@ namespace JalaNota
                 if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
                     throw new ArgumentException("Password harus minimal 6 karakter.");
 
+                // Hapus semua spasi dari username
+                username = username.Replace(" ", "");
+
                 // Cek username duplikat
                 if (!await IsUsernameAvailable(username))
                     throw new InvalidOperationException("Username sudah digunakan.");
@@ -165,6 +171,9 @@ namespace JalaNota
 
                 if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
                     throw new ArgumentException("Password harus minimal 6 karakter.");
+
+                // Hapus semua spasi dari username
+                username = username.Replace(" ", "");
 
                 // Cek username duplikat (kecuali untuk nelayan ini sendiri)
                 if (!await IsUsernameAvailable(username, id))

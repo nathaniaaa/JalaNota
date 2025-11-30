@@ -56,15 +56,7 @@ namespace JalaNota
         // Tambah nelayan baru
         private async void btnInput_Click(object sender, RoutedEventArgs e)
         {
-            // Validasi: ID harus kosong untuk input baru
-            if (!string.IsNullOrWhiteSpace(txtIDNelayan.Text))
-            {
-                MessageBox.Show("Untuk menambah nelayan baru, pastikan form kosong. Klik CLOSE terlebih dahulu.",
-                    "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            // Validasi UI
+            // Validasi UI - ID tidak perlu dicek karena auto-generate
             if (string.IsNullOrWhiteSpace(txtNamaNelayan.Text) || 
                 string.IsNullOrWhiteSpace(txtUsername.Text) || 
                 string.IsNullOrWhiteSpace(txtPassword.Text))
@@ -85,16 +77,21 @@ namespace JalaNota
             {
                 this.Cursor = System.Windows.Input.Cursors.Wait;
 
+                // Trim dan simpan username (spasi dihapus otomatis di method Nelayan)
+                string username = txtUsername.Text.Trim();
+
                 // Encapsulation Method: Panggil method yang sudah ada validasinya
                 bool sukses = await Nelayan.TambahNelayanBaru(
                     txtNamaNelayan.Text.Trim(), 
-                    txtUsername.Text.Trim(), 
+                    username, 
                     txtPassword.Text
                 );
 
                 if (sukses)
                 {
-                    MessageBox.Show("Nelayan baru berhasil ditambahkan.", 
+                    // Tampilkan username tanpa spasi di pesan sukses
+                    string cleanUsername = username.Replace(" ", "");
+                    MessageBox.Show($"Nelayan baru berhasil ditambahkan.\nUsername: {cleanUsername}", 
                         "Sukses", MessageBoxButton.OK, MessageBoxImage.Information);
                     
                     // Reload data dari database
@@ -150,15 +147,18 @@ namespace JalaNota
             {
                 this.Cursor = System.Windows.Input.Cursors.Wait;
 
+                // Trim username (spasi dihapus otomatis di method Nelayan)
+                string username = txtUsername.Text.Trim();
+
                 // Debug: Tampilkan ID yang akan diupdate
                 System.Diagnostics.Debug.WriteLine($"Attempting to update Nelayan ID: {nelayanId}");
-                System.Diagnostics.Debug.WriteLine($"New Username: {txtUsername.Text.Trim()}");
+                System.Diagnostics.Debug.WriteLine($"New Username: {username}");
 
                 // Encapsulation Method: Panggil method untuk update data dengan ID dari textbox
                 bool sukses = await Nelayan.UbahNelayan(
                     nelayanId,  
                     txtNamaNelayan.Text.Trim(),
-                    txtUsername.Text.Trim(),
+                    username,
                     txtPassword.Text
                 );
 

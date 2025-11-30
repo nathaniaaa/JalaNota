@@ -94,7 +94,7 @@ namespace JalaNota
         // CRUD
         private async void btnInput_Click(object sender, RoutedEventArgs e)
         {
-            // validasi
+            // Validasi - ID tidak perlu dicek karena auto-generate di database
             if (cmbNamaNelayan.SelectedValue == null || cmbNamaIkan.SelectedValue == null ||
                 !dpTanggalSetoran.SelectedDate.HasValue || string.IsNullOrWhiteSpace(txtBerat.Text) ||
                 string.IsNullOrWhiteSpace(txtJam.Text) || string.IsNullOrWhiteSpace(txtMenit.Text))

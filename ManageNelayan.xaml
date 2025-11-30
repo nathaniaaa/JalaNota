@@ -171,7 +171,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Text="ID Nelayan:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0,5"/>
-                        <TextBox x:Name="txtIDNelayan" Grid.Row="0" Grid.Column="1" Margin="0,5" Height="28"/>
+                        <TextBox x:Name="txtIDNelayan" Grid.Row="0" Grid.Column="1" Margin="0,5" Height="28" IsReadOnly="True" IsEnabled="False" Background="#E0E0E0"/>
 
                         <TextBlock Text="Nama Nelayan:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="0,5"/>
                         <TextBox x:Name="txtNamaNelayan" Grid.Row="1" Grid.Column="1" Margin="0,5" Height="28"/>
